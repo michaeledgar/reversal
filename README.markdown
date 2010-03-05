@@ -1,4 +1,4 @@
-= reversal
+# reversal
 
 You will need a [tiny patch](http://github.com/michaeledgar/reversal/blob/master/iseq.c.patch) to your 
 interpreter for this to work.  I will be petitioning for this to be added to Ruby 1.9.2. The patch should be
@@ -48,7 +48,7 @@ applied to iseq.c.
      }
 
 
-== Note on Patches/Pull Requests
+## Note on Patches/Pull Requests
  
 * Fork the project.
 * Make your feature addition or bug fix.
@@ -59,6 +59,6 @@ applied to iseq.c.
    bump version in a commit by itself I can ignore when I pull)
 * Send me a pull request. Bonus points for topic branches.
 
-== Copyright
+## Copyright
 
 Copyright (c) 2010 Michael Edgar. See LICENSE for details.
