@@ -25,6 +25,18 @@ describe "Instruction Sequence Wrapper" do
     should.not.raise {iseq.validate!}
   end
   
+  it "raises an error if initialized unknown version number" do
+    should.raise(Reversal::UnknownInstructionSequenceError) do
+      Reversal::ISeq.new(["YARVInstructionSequence/SimpleDataFormat", 0, 0, 0])
+    end
+  end
+  
+  it "raises an error if validation fails" do
+    should.raise(Reversal::InvalidInstructionSequenceError) do
+      Reversal::ISeq.new(["Bad Magic", 1, 2, 1]).validate!
+    end
+  end
+  
   it "detects method types" do
     @simple.type.should == :method
   end
