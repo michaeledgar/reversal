@@ -79,6 +79,10 @@ module Reversal
       decompile_body(iseq)
     end
     
+    OPERATOR_LOOKUP = {:opt_plus => "+", :opt_minus => "-", :opt_mult => "*", :opt_div => "/",
+                       :opt_mod => "%", :opt_eq => "==", :opt_neq => "!=", :opt_lt => "<",
+                       :opt_le => "<=", :opt_gt => ">", :opt_ge => ">=", :opt_ltlt => "<<"}
+    
     def decompile_body(iseq, instruction = 0)
       instruction = 0
       # locals we'll use
@@ -114,6 +118,10 @@ module Reversal
             push "self"
           when :putnil
             push "nil"
+          when *OPERATOR_LOOKUP.keys
+            arg = pop
+            receiver = pop
+            push "#{receiver} #{OPERATOR_LOOKUP[inst.first]} #{arg}"
           when :send
             meth, argc, blockiseq, op_flag, ic = inst[1..-1]
             
