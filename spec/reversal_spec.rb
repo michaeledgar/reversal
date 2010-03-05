@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe "Reversal" do
-  it "fails" do
-    should.flunk "hey buddy, you should probably rename this file and start specing for real"
+  it "should have a version" do
+    Reversal::VERSION.should.not.equal nil
   end
 end
