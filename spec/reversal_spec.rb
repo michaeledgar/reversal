@@ -28,6 +28,14 @@ class A
   def chained_methods(arg1, arg2)
     arg1.a_method(arg1, arg2).another_method.to_s
   end
+  
+  def length_test(arg1)
+    arg1.length
+  end
+  
+  def succ_test(arg1)
+    arg1.succ
+  end
 end
 
 describe "Method Reversal" do
@@ -75,6 +83,17 @@ def chained_methods(arg1, arg2)
   arg1.a_method(arg1, arg2).another_method.to_s
 end
 EOF
+    @length_test = DecompilationTestCase.new(A, :length_test, <<-EOF)
+def length_test(arg1)
+  arg1.length
+end
+EOF
+
+    @succ_test = DecompilationTestCase.new(A, :succ_test, <<-EOF)
+def succ_test(arg1)
+  arg1.succ
+end
+EOF
   end
   
   it "can decompile a method with one positional argument" do
@@ -103,5 +122,13 @@ EOF
   
   it "interpolates a simple string" do
     @interpolates_a_string_case.assert_correct
+  end
+  
+  it "decompiles a call to length" do
+    @length_test.assert_correct
+  end
+  
+  it "decompiles a call to succ" do
+    @succ_test.assert_correct
   end
 end

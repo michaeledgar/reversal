@@ -81,7 +81,8 @@ module Reversal
     
     OPERATOR_LOOKUP = {:opt_plus => "+", :opt_minus => "-", :opt_mult => "*", :opt_div => "/",
                        :opt_mod => "%", :opt_eq => "==", :opt_neq => "!=", :opt_lt => "<",
-                       :opt_le => "<=", :opt_gt => ">", :opt_ge => ">=", :opt_ltlt => "<<"}
+                       :opt_le => "<=", :opt_gt => ">", :opt_ge => ">=", :opt_ltlt => "<<",
+                       :opt_regexpmatch2 => "=~"}
     TRACE_NEWLINE = 1
     TRACE_EXIT = 16
     def decompile_body(iseq, instruction = 0)
@@ -172,6 +173,15 @@ module Reversal
           when :opt_aset
             new_val, key, receiver = pop, pop, pop
             push "#{receiver}[#{key}] = #{new_val}"
+          when :opt_not
+            receiver = pop
+            push "!#{receiver}"
+          when :opt_length
+            receiver = pop
+            push "#{receiver}.length"
+          when :opt_succ
+            receiver = pop
+            push "#{receiver}.succ"
           when :send
             meth, argc, blockiseq, op_flag, ic = inst[1..-1]
             
@@ -190,6 +200,9 @@ module Reversal
             receiver = pop
             if meth == :[]=
               result = "#{receiver}[#{args[0]}] = #{args[1]}"
+            elsif OPERATOR_LOOKUP.values.include?(meth.to_s)
+              # did an operator sneak by as receiver.=~(arg) or something?
+              result = "#{receiver} #{meth} #{args.first}"
             else
               if (receiver == "nil")
                 result = "#{meth}"

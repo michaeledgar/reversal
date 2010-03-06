@@ -52,6 +52,18 @@ class A
   def aset(arr, key, val)
     arr[key] = val
   end
+  
+  def regexpmatch(a, b)
+    a =~ /constant/
+  end
+  
+  def regexpmatch2(a, b)
+    a =~ b
+  end
+  
+  def test_not(thing)
+    !thing
+  end
 end
 
 describe "Operator Reversal" do
@@ -122,11 +134,26 @@ def aref(arr, key)
 end
 EOF
 
-    ## YARV does not compile this to arr[key] = val. It compiles it to
-    ## arr.[]=(key, val). So until I clean that up, it looks like this
     @aset_case = DecompilationTestCase.new(A, :aset, <<-EOF)
 def aset(arr, key, val)
   arr[key] = val
+end
+EOF
+
+    @regexpmatch = DecompilationTestCase.new(A, :regexpmatch, <<-EOF)
+def regexpmatch(a, b)
+  a =~ /constant/
+end
+EOF
+
+    @regexpmatch2 = DecompilationTestCase.new(A, :regexpmatch2, <<-EOF)
+def regexpmatch2(a, b)
+  a =~ b
+end
+EOF
+    @test_not = DecompilationTestCase.new(A, :test_not, <<-EOF)
+def test_not(thing)
+  !thing
 end
 EOF
   end
@@ -183,4 +210,15 @@ EOF
     @aset_case.assert_correct
   end
   
+  it "can decompile a simple regexp-matching operator against a constant regexp" do
+    @regexpmatch.assert_correct
+  end
+  
+  it "can decompile a simple regexp-matching operator of local variables" do
+    @regexpmatch2.assert_correct
+  end
+  
+  it "can decompile a simple not operator on a local variable" do
+    @test_not.assert_correct
+  end
 end
