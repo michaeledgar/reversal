@@ -33,6 +33,10 @@ class A
   def get_special_var_number
     $3
   end
+  
+  def get_constant
+    ALOHA
+  end
 end
 
 describe "Variable Assignment/Retrieval Reversal" do
@@ -85,6 +89,14 @@ def get_special_var_number
   $3
 end
 EOF
+
+    @set_constant = CompiledDecompilationTestCase.new("ALOHA = 10", "ALOHA = 10")
+    
+    @get_constant = DecompilationTestCase.new(A, :get_constant, <<-EOF)
+def get_constant
+  ALOHA
+end
+EOF
   end
   
   it "can decompile a method with simple local assignments" do
@@ -117,5 +129,13 @@ EOF
   
   it "can decompile a method using the $(digit) special variables" do
     @get_special_var_number.assert_correct
+  end
+  
+  it "can decompile the simplest case for setting a constant" do
+    @set_constant.assert_correct
+  end
+  
+  it "can decompile the retrieval of a constant" do
+    @get_constant.assert_correct
   end
 end

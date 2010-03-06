@@ -12,6 +12,10 @@ class A
     5.minutes()
   end
   
+  def uses_a_string
+    var = "a string"
+  end
+  
   def first_multiline(arg)
     hello = arg.crazy
     puts(hello)
@@ -42,7 +46,13 @@ def calls_a_method
   5.minutes()
 end
 EOF
-    
+
+    @uses_a_string_case = DecompilationTestCase.new(A, :uses_a_string, <<-EOF)
+def uses_a_string
+  var = "a string"
+end
+EOF
+
     @first_multiline_case = DecompilationTestCase.new(A, :first_multiline, <<-EOF)
 def first_multiline(arg)
   hello = arg.crazy()
@@ -63,6 +73,10 @@ EOF
   
   it "can decompile a method with two positional arguments" do
     @two_arg_case.assert_correct
+  end
+  
+  it "can decompile a simple expression with a string" do
+    @uses_a_string_case.assert_correct
   end
   
   it "can decompile a method being called" do

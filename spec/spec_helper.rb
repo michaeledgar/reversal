@@ -18,4 +18,12 @@ class DecompilationTestCase
   end
 end
 
+class CompiledDecompilationTestCase < DecompilationTestCase
+  def initialize(input, output)
+    @seq = RubyVM::InstructionSequence.compile(input)
+    @reverser = Reversal::Reverser.new(@seq)
+    @result = output.strip
+  end
+end
+
 Bacon.summary_on_exit

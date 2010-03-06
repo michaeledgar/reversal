@@ -82,7 +82,8 @@ module Reversal
     OPERATOR_LOOKUP = {:opt_plus => "+", :opt_minus => "-", :opt_mult => "*", :opt_div => "/",
                        :opt_mod => "%", :opt_eq => "==", :opt_neq => "!=", :opt_lt => "<",
                        :opt_le => "<=", :opt_gt => ">", :opt_ge => ">=", :opt_ltlt => "<<"}
-    
+    TRACE_NEWLINE = 1
+    TRACE_EXIT = 16
     def decompile_body(iseq, instruction = 0)
       instruction = 0
       # locals we'll use
@@ -101,7 +102,7 @@ module Reversal
           case inst.first
           when :trace
             case inst[1]
-            when 1
+            when TRACE_NEWLINE, TRACE_EXIT
               # new line
               add_line pop if @stack.any?
             end
@@ -124,16 +125,28 @@ module Reversal
             else
               push "$#{(type >> 1)}"
             end
+          when :getconstant
+            push inst[1]
           when :setlocal
             push("#{locals[inst[1] - 1]} = #{pop}")
           when :setinstancevariable
             push("#{inst[1]} = #{pop}")
           when :setglobal
             push("#{inst[1]} = #{pop}")
+          when :setconstant
+            name = inst[1]
+            scoping_arg, value = pop, pop
+            push("#{name} = #{value}")
           when :putself
             push "self"
           when :putnil
             push "nil"
+          when :putstring
+            push "\"#{inst[1]}\""
+          when :putspecialobject
+            # these are for runtime checks - just put the number it asks for, and ignore it
+            # later
+            push inst[1]
           when :setn
             amt = inst[1]
             val = pop
@@ -176,7 +189,7 @@ module Reversal
             end
             push result
           when :leave
-            add_line pop
+            add_line pop if iseq.type == :top && @stack.any?
           end
         end
         instruction += 1
