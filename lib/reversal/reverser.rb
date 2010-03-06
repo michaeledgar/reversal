@@ -141,8 +141,19 @@ module Reversal
             push "self"
           when :putnil
             push "nil"
+            
+          ## Strings
           when :putstring
             push "\"#{inst[1]}\""
+          when :tostring
+            push "(#{pop}).to_s"
+          when :concatstrings
+            amt = inst[1]
+            ret = []
+            1.upto(amt) do
+              ret.unshift pop
+            end
+            push ret.join(" + ")
           when :putspecialobject
             # these are for runtime checks - just put the number it asks for, and ignore it
             # later
@@ -185,7 +196,7 @@ module Reversal
               else
                 result = "#{receiver}.#{meth}"
               end
-              result << "(#{args.join(", ")})"
+              result << (args.any? ? "(#{args.join(", ")})" : "")
             end
             push result
           when :leave
