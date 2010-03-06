@@ -100,6 +100,11 @@ module Reversal
         when Array
           case inst.first
           when :trace
+            case inst[1]
+            when 1
+              # new line
+              add_line pop if @stack.any?
+            end
           when :dup
             val = pop
             push val
@@ -108,20 +113,41 @@ module Reversal
             push inst[1].inspect
           when :getlocal
             push locals[inst[1] - 1]
-          when :getinstancevariable
+          when :getinstancevariable, :getglobal
             push inst[1]
+          when :getspecial
+            key, type = inst[1..2]
+            if type == 0
+              # some weird shit i don't get
+            elsif (type & 0x01 > 0)
+              push "$#{(type >> 1).chr}"
+            else
+              push "$#{(type >> 1)}"
+            end
           when :setlocal
-            add_line("#{locals[inst[1] - 1]} = #{pop}")
+            push("#{locals[inst[1] - 1]} = #{pop}")
           when :setinstancevariable
-            add_line("#{inst[1]} = #{pop}")
+            push("#{inst[1]} = #{pop}")
+          when :setglobal
+            push("#{inst[1]} = #{pop}")
           when :putself
             push "self"
           when :putnil
             push "nil"
+          when :setn
+            amt = inst[1]
+            val = pop
+            @stack[-amt] = val
+            push val
           when *OPERATOR_LOOKUP.keys
-            arg = pop
-            receiver = pop
+            arg, receiver = pop, pop
             push "#{receiver} #{OPERATOR_LOOKUP[inst.first]} #{arg}"
+          when :opt_aref
+            key, receiver = pop, pop
+            push "#{receiver}[#{key}]"
+          when :opt_aset
+            new_val, key, receiver = pop, pop, pop
+            push "#{receiver}[#{key}] = #{new_val}"
           when :send
             meth, argc, blockiseq, op_flag, ic = inst[1..-1]
             
@@ -138,13 +164,16 @@ module Reversal
             end
             
             receiver = pop
-            if (receiver == "nil")
-              result = "#{meth}"
+            if meth == :[]=
+              result = "#{receiver}[#{args[0]}] = #{args[1]}"
             else
-              result = "#{receiver}.#{meth}"
+              if (receiver == "nil")
+                result = "#{meth}"
+              else
+                result = "#{receiver}.#{meth}"
+              end
+              result << "(#{args.join(", ")})"
             end
-            
-            result << "(#{args.join(",")})"
             push result
           when :leave
             add_line pop

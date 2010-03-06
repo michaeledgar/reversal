@@ -1,29 +1,11 @@
 require 'spec_helper'
 
-describe "Reversal" do
-  it "should have a version" do
-    Reversal::VERSION.should.not.equal nil
-  end
-end
-
 class A
-  def simple
-    a = 10
-    b = 15
-  end
   
   def has_one_arg(a)
   end
   
   def has_two_args(a,b,c)
-  end
-  
-  def assigns_ivar(val)
-    @some_ivar = 5
-  end
-  
-  def assigns_and_gets_ivar
-    @some_ivar = @another_ivar
   end
   
   def calls_a_method
@@ -34,17 +16,14 @@ class A
     hello = arg.crazy
     puts(hello)
   end
+  
+  def chained_methods(arg1, arg2)
+    arg1.a_method(arg1, arg2).another_method.to_s
+  end
 end
 
 describe "Method Reversal" do
   before do
-    @simple_case = DecompilationTestCase.new(A, :simple, <<-EOF)
-def simple
-  a = 10
-  b = 15
-  15
-end
-EOF
     
     @one_arg_case = DecompilationTestCase.new(A, :has_one_arg, <<-EOF)
 def has_one_arg(a)
@@ -58,21 +37,6 @@ def has_two_args(a, b, c)
 end
 EOF
     
-    @assigns_ivar_case = DecompilationTestCase.new(A, :assigns_ivar, <<-EOF)
-def assigns_ivar(val)
-  @some_ivar = 5
-  5
-end
-EOF
-    
-    @assigns_ivar_set_get_case = DecompilationTestCase.new(A, :assigns_and_gets_ivar, <<-EOF)
-def assigns_and_gets_ivar
-  @some_ivar = @another_ivar
-  @another_ivar
-end
-EOF
-    
-    
     @calls_a_method_case = DecompilationTestCase.new(A, :calls_a_method, <<-EOF)
 def calls_a_method
   5.minutes()
@@ -85,10 +49,12 @@ def first_multiline(arg)
   puts(hello)
 end
 EOF
-  end
-  
-  it "can decompile a method with simple local assignments" do
-    @simple_case.assert_correct
+
+    @chained_method_case = DecompilationTestCase.new(A, :chained_methods, <<-EOF)
+def chained_methods(arg1, arg2)
+  arg1.a_method(arg1, arg2).another_method().to_s()
+end
+EOF
   end
   
   it "can decompile a method with one positional argument" do
@@ -99,19 +65,15 @@ EOF
     @two_arg_case.assert_correct
   end
   
-  it "can decompile a method that assigns an instance variable" do
-    @assigns_ivar_case.assert_correct
-  end
-  
-  it "can decompile a method that assigns and gets an instance variable" do
-    @assigns_ivar_set_get_case.assert_correct
-  end
-  
   it "can decompile a method being called" do
     @calls_a_method_case.assert_correct
   end
   
   it "can handle a complex multiline decompilation" do
     @first_multiline_case.assert_correct
+  end
+  
+  it "decompiles chained methods appropriately" do
+    @chained_method_case.assert_correct
   end
 end

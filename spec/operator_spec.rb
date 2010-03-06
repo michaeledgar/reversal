@@ -1,11 +1,5 @@
 require 'spec_helper'
 
-describe "Reversal" do
-  it "should have a version" do
-    Reversal::VERSION.should.not.equal nil
-  end
-end
-
 class A
   def plus(a, b)
     a + b
@@ -49,6 +43,14 @@ class A
   
   def ltlt(a, b)
     a << b
+  end
+  
+  def aref(arr, key)
+    arr[key]
+  end
+  
+  def aset(arr, key, val)
+    arr[key] = val
   end
 end
 
@@ -114,7 +116,19 @@ def ltlt(a, b)
   a << b
 end
 EOF
+    @aref_case = DecompilationTestCase.new(A, :aref, <<-EOF)
+def aref(arr, key)
+  arr[key]
+end
+EOF
 
+    ## YARV does not compile this to arr[key] = val. It compiles it to
+    ## arr.[]=(key, val). So until I clean that up, it looks like this
+    @aset_case = DecompilationTestCase.new(A, :aset, <<-EOF)
+def aset(arr, key, val)
+  arr[key] = val
+end
+EOF
   end
   
   it "can decompile a simple addition of local variables" do
@@ -159,6 +173,14 @@ EOF
   
   it "can decompile a simple left-shift of local variables" do
     @ltlt_case.assert_correct
+  end
+  
+  it "can decompile a simple array-style-reference operator of local variables" do
+    @aref_case.assert_correct
+  end
+  
+  it "can decompile a simple array-style-assignment operator of local variables" do
+    @aset_case.assert_correct
   end
   
 end
