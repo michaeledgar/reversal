@@ -36,6 +36,10 @@ class A
   def use_yield(arg, another)
     yield another, arg
   end
+  
+  def has_block_param(arg, &blk)
+    puts blk
+  end
 end
 
 describe "Method Reversal" do
@@ -92,6 +96,12 @@ def use_yield(arg, another)
   yield(another, arg)
 end
 EOF
+
+    @has_block_param = DecompilationTestCase.new(A, :has_block_param, <<-EOF)
+def has_block_param(arg, &blk)
+  puts(blk)
+end
+EOF
   end
   
   it "can decompile a method with one positional argument" do
@@ -128,5 +138,9 @@ EOF
   
   it "decompiles a call to yield" do
     @use_yield.assert_correct
+  end
+  
+  it "decompiles methods with block parameters" do
+    @has_block_param.assert_correct
   end
 end

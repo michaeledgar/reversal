@@ -87,6 +87,10 @@ module Reversal
       ret
     end
     
+    def string_wrap(string, left, right)
+      "#{left}#{string}#{right}"
+    end
+    
     # include specific modules for different reversal techniques
     def decompile
       reset!
@@ -112,11 +116,8 @@ module Reversal
     end
     
     def decompile_block(iseq)
-      args = ""
-      if iseq.stats[:arg_size] > 0
-        args_to_use = iseq.locals[0...iseq.num_args]
-        args = "|" + args_to_use.map {|x| x.to_s}.join(", ") + "|"
-      end
+      args = iseq.argstring
+      args = string_wrap(args, "|", "|") if iseq.stats[:arg_size] > 0
       add_line(" do #{args}", false)
       indented do
         yield iseq
@@ -125,11 +126,8 @@ module Reversal
     end
     
     def decompile_method(iseq)
-      args = ""
-      if iseq.stats[:arg_size] > 0
-        args_to_use = iseq.locals[0...iseq.num_args]
-        args = "(" + args_to_use.map {|x| x.to_s}.join(", ") + ")"
-      end
+      args = iseq.argstring
+      args = string_wrap(args, "(", ")") if iseq.stats[:arg_size] > 0
       wrap_and_indent("def #{iseq.name}#{args}", "end") do
         yield iseq
       end
