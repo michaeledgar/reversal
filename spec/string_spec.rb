@@ -11,7 +11,7 @@ class A
 
 end
 
-describe "Method Reversal" do
+describe "String Reversal" do
   before do
     @uses_a_string_case = DecompilationTestCase.new(A, :uses_a_string, <<-EOF)
 def uses_a_string

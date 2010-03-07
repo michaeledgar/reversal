@@ -276,6 +276,18 @@ module Reversal
             exclusive = (inst[1] == 1)
             result = exclusive ? "(#{first}...#{last})" : "(#{first}..#{last})"
             push result
+            
+          ##############
+          ## Hashes ####
+          ##############
+          when :newhash
+            # [:newhash, number_to_pop]
+            list = []
+            0.step(inst[1] - 2, 2) do
+              list.unshift [pop, pop].reverse
+            end
+            list.map! {|(k, v)| "#{k} => #{v}" }
+            push "{#{list.join(', ')}}"
           
           #######################
           #### Weird Stuff ######
@@ -308,6 +320,10 @@ module Reversal
           when :putnil
             # [:putnil]
             push "nil"
+          when :swap
+            a, b = pop, pop
+            push b
+            push a
           # when :pop
           #   pop
             
@@ -349,6 +365,36 @@ module Reversal
           when :send
             # [:send, meth, argc, blockiseq, op_flag, inline_cache]
             do_send *inst[1..-1]
+          
+          #######################
+          ##### Control Flow ####
+          #######################
+          when :throw
+            # [:throw, level | state]
+            # state: 0x01 = return
+            #        0x02 = break
+            #        0x03 = next
+            #        0x04 = "retry" (rescue?)
+            #        0x05 = redo
+            throw_state = inst[1]
+            # not sure what good these all are for decompiling. interesting though.
+            state = throw_state & 0xff
+            flag  = throw_state & 0x8000
+            level = throw_state >> 16
+            case state
+            when 0x01
+              push "return #{pop}"
+            when 0x02
+              push "break #{pop}"
+            when 0x03
+              push "next #{pop}"
+            when 0x04
+              pop #useless nil
+              push "retry"
+            when 0x05
+              pop #useless nil
+              push "redo"
+            end
           
           #########################
           ##### Tracing ###########

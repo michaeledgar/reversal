@@ -1,6 +1,10 @@
 require 'spec_helper'
 
-class A
+class A  
+  def makes_empty_array
+    []
+  end
+  
   def uses_a_constant_array
     [1, 2, 3]
   end
@@ -19,8 +23,14 @@ class A
 
 end
 
-describe "Method Reversal" do
+describe "Array Reversal" do
   before do
+    @makes_empty_array = DecompilationTestCase.new(A, :makes_empty_array, <<-EOF)
+def makes_empty_array
+  []
+end
+EOF
+
     @uses_a_constant_array = DecompilationTestCase.new(A, :uses_a_constant_array, <<-EOF)
 def uses_a_constant_array
   [1, 2, 3]
@@ -44,6 +54,10 @@ def splatted_array(arr)
 end
 EOF
 
+  end
+
+  it "correctly decompiles empty arrays" do
+    @makes_empty_array.assert_correct
   end
 
   it "can decompile an array of constants" do
