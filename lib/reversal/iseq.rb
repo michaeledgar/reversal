@@ -62,5 +62,14 @@ module Reversal
       self.catch_tables = args[11]
       self.body = args[12]
     end
+    
+    def num_args
+      case self.args
+      when Integer
+        self.args
+      when Array
+        self.args[0]
+      end
+    end
   end
 end
