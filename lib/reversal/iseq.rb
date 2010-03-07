@@ -61,6 +61,8 @@ module Reversal
       self.args = args[10]
       self.catch_tables = args[11]
       self.body = args[12]
+      
+      @labels = nil
     end
     
     def num_args
@@ -82,6 +84,17 @@ module Reversal
         newargs[arg_rest] = "*#{self.locals[arg_rest]}"
       end
       newargs
+    end
+    
+    def labels
+      return @labels if @labels
+      result = {}
+      self.body.each_with_index do |inst, idx|
+        if inst.is_a?(Symbol) && inst.to_s[0..6] = "label_"
+          result[inst] = idx
+        end
+      end 
+      @labels = result
     end
     
     def argstring

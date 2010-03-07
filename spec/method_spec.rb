@@ -83,6 +83,7 @@ def chained_methods(arg1, arg2)
   arg1.a_method(arg1, arg2).another_method.to_s
 end
 EOF
+
     @length_test = DecompilationTestCase.new(A, :length_test, <<-EOF)
 def length_test(arg1)
   arg1.length

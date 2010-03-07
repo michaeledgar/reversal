@@ -17,6 +17,7 @@ module Reversal
       @iseq.validate!
       
       @parent = parent
+      @locals = (@iseq.locals + [:self]).reverse
       reset!
     end
     
@@ -176,15 +177,12 @@ module Reversal
                        :opt_regexpmatch2 => "=~"}
     TRACE_NEWLINE = 1
     TRACE_EXIT = 16
-    def decompile_body(iseq, instruction = 0)
-      instruction = 0
+    def decompile_body(iseq, instruction = 0, stop = iseq.body.size)
       # locals we'll use
-      @locals = (iseq.locals + [:self]).reverse
-      
       labels = {}
       # for now, using non-idiomatic while loop bc of a chance we might need to
       # loop back
-      while instruction < iseq.body.size do
+      while instruction < stop do
         inst = iseq.body[instruction]
         case inst
         when Integer
