@@ -178,7 +178,6 @@ module Reversal
     TRACE_NEWLINE = 1
     TRACE_EXIT = 16
     def decompile_body(iseq, instruction = 0, stop = iseq.body.size)
-      # locals we'll use
       labels = {}
       # for now, using non-idiomatic while loop bc of a chance we might need to
       # loop back
@@ -192,22 +191,11 @@ module Reversal
           # :label_y
           labels[inst] = instruction
         when Array
-          case inst.first
-          when :trace
-            # [:trace, flag_num]
-            case inst[1]
-            when TRACE_NEWLINE, TRACE_EXIT
-              # new line
-              add_line pop if @stack.any?
-            end
-          when :dup
-            # [:dup]
-            val = pop
-            push val
-            push val
-          when :putobject
-            # [:putobject, literal]
-            push inst[1].inspect
+          case inst.first            
+          #############################
+          ###### Variable Lookup ######
+          #############################
+          
           when :getlocal
             # [:getlocal, local_num]
             push get_local(inst[1])
@@ -227,6 +215,11 @@ module Reversal
             else
               push "$#{(type >> 1)}"
             end
+            
+          #############################
+          ##### Variable Assignment ###
+          #############################
+          
           when :setlocal
             # [:setlocal, local_num]
             push("#{locals[inst[1] - 1]} = #{pop}")
@@ -239,13 +232,11 @@ module Reversal
             name = inst[1]
             scoping_arg, value = pop, pop
             push("#{name} = #{value}")
-          when :putself
-            # [:putself]
-            push "self"
-          when :putnil
-            # [:putnil]
-            push "nil"
-          ## Strings
+            
+          ###################
+          ##### Strings #####
+          ###################
+          
           when :putstring
             # [:putstring, "the string to push"]
             push "\"#{inst[1]}\""
@@ -256,16 +247,73 @@ module Reversal
             # [:concatstrings, num_strings_to_pop_and_join]
             amt = inst[1]
             push pop(amt).join(" + ")
+          
+          ##################
+          ### Arrays #######
+          ##################
+          when :duparray
+            # [:duparray, [array, here]]
+            push inst[1]
+          when :newarray
+            # [:newarray, num_to_pop]
+            arr = popn(inst[1])
+            push("[#{arr.join(", ")}]")
+          when :splatarray
+            # [:splatarray]
+            push "*#{pop}"
+          when :concatarray
+            # [:concatarray, ignored_boolean_flag]
+            arg, receiver = pop, pop
+            receiver = receiver[1..-1] if (receiver[0, 1]) == "*"
+            push "(#{receiver} + #{arg})"
+            
+          ###################
+          ### Ranges ########
+          ###################
+          when :newrange
+            # [:newrange, exclusive_if_1]
+            last, first = pop, pop
+            exclusive = (inst[1] == 1)
+            result = exclusive ? "(#{first}...#{last})" : "(#{first}..#{last})"
+            push result
+          
+          #######################
+          #### Weird Stuff ######
+          #######################
           when :putspecialobject
             # these are for runtime checks - just put the number it asks for, and ignore it
             # later
             push inst[1]
+            
+          ############################
+          ##### Stack Manipulation ###
+          ############################
           when :setn
             # [:setn, num_to_move]
             amt = inst[1]
             val = pop
             @stack[-amt] = val
             push val
+          when :dup
+            # [:dup]
+            val = pop
+            push val
+            push val
+          when :putobject
+            # [:putobject, literal]
+            push inst[1].inspect
+          when :putself
+            # [:putself]
+            push "self"
+          when :putnil
+            # [:putnil]
+            push "nil"
+          # when :pop
+          #   pop
+            
+          ####################
+          #### Operators #####
+          ####################
           when *OPERATOR_LOOKUP.keys
             # [:opt_#type]
             arg, receiver = pop, pop
@@ -290,6 +338,10 @@ module Reversal
             # [:opt_succ]
             receiver = pop
             push "#{receiver}.succ"
+            
+          ##############################
+          ##### Method Dispatch ########
+          ##############################
           when :invokesuper
             do_send :super, inst[1], inst[2], inst[3], inst[4], :implicit
           when :invokeblock
@@ -297,6 +349,17 @@ module Reversal
           when :send
             # [:send, meth, argc, blockiseq, op_flag, inline_cache]
             do_send *inst[1..-1]
+          
+          #########################
+          ##### Tracing ###########
+          #########################
+          when :trace
+            # [:trace, flag_num]
+            case inst[1]
+            when TRACE_NEWLINE, TRACE_EXIT
+              # new line
+              add_line pop if @stack.any?
+            end
           when :leave
             # [:leave]
             add_line pop if iseq.type != :method && @stack.any?
