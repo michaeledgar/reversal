@@ -144,12 +144,11 @@ module Reversal
     
     ##
     # Handle a send instruction in the bytecode
-    def do_send(inst)
+    def do_send(meth, argc, blockiseq, op_flag, ic, receiver = nil)
       # [:send, meth, argc, blockiseq, op_flag, inline_cache]
-      meth, argc, blockiseq, op_flag, ic = inst[1..-1]
-
       args = popn(argc)
-      receiver = pop
+      receiver ||= pop
+      receiver = :implicit if receiver == "nil"
       
       if meth == :[]=
         result = "#{receiver}[#{args[0]}] = #{args[1]}"
@@ -158,7 +157,7 @@ module Reversal
         result = "#{receiver} #{meth} #{args.first}"
       else
         result = meth.to_s
-        result = "#{receiver}.#{result}" if receiver != "nil"
+        result = "#{receiver}.#{result}" if receiver != :implicit
         result << (args.any? ? "(#{args.join(", ")})" : "")
       end
       
@@ -295,9 +294,13 @@ module Reversal
             # [:opt_succ]
             receiver = pop
             push "#{receiver}.succ"
+          when :invokesuper
+            do_send :super, inst[1], inst[2], inst[3], inst[4], :implicit
+          when :invokeblock
+            do_send :yield, inst[1], nil, inst[2], nil, :implicit
           when :send
             # [:send, meth, argc, blockiseq, op_flag, inline_cache]
-            do_send inst
+            do_send *inst[1..-1]
           when :leave
             # [:leave]
             add_line pop if iseq.type != :method && @stack.any?

@@ -28,6 +28,14 @@ class A
   def succ_test(arg1)
     arg1.succ
   end
+  
+  def use_super(arg, other)
+    super arg
+  end
+  
+  def use_yield(arg, another)
+    yield another, arg
+  end
 end
 
 describe "Method Reversal" do
@@ -74,6 +82,16 @@ def succ_test(arg1)
   arg1.succ
 end
 EOF
+    @use_super = DecompilationTestCase.new(A, :use_super, <<-EOF)
+def use_super(arg, other)
+  super(arg)
+end
+EOF
+    @use_yield = DecompilationTestCase.new(A, :use_yield, <<-EOF)
+def use_yield(arg, another)
+  yield(another, arg)
+end
+EOF
   end
   
   it "can decompile a method with one positional argument" do
@@ -102,5 +120,13 @@ EOF
   
   it "decompiles a call to succ" do
     @succ_test.assert_correct
+  end
+  
+  it "decompiles a call to super" do
+    @use_super.assert_correct
+  end
+  
+  it "decompiles a call to yield" do
+    @use_yield.assert_correct
   end
 end
