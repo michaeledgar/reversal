@@ -41,6 +41,8 @@ class << self
   x = self
 end
 RESULT
+
+    
   end
   
   it "decompiles an empty class" do

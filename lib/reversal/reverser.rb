@@ -207,11 +207,15 @@ module Reversal
           when :getlocal
             # [:getlocal, local_num]
             push get_local(inst[1])
-          when :getinstancevariable, :getglobal, :getconstant
+          when :getinstancevariable, :getglobal
             # [:getinstancevariable, :ivar_name_as_symbol]
             # [:getglobal, :global_name_as_symbol]
-            # [:getconstant, :constant_name_as_symbol]
             push inst[1]
+          when :getconstant
+            # [:getconstant, :constant_name_as_symbol]
+            base = pop
+            base_str = base == "nil" ? "" : "#{base}::"
+            push "#{base_str}#{inst[1]}"
           when :getdynamic
             push get_dynamic(inst[1], inst[2])
           when :getspecial
@@ -426,6 +430,12 @@ module Reversal
                 add_line new_reverser.decompile
               end
             end
+          
+          ###############################
+          ### Inline Cache Simulation ###
+          ###############################
+          when :getinlinecache, :onceinlinecache
+            push "nil"
           
           #########################
           ##### Tracing ###########

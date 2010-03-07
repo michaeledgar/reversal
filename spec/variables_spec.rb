@@ -37,6 +37,10 @@ class A
   def get_constant
     ALOHA
   end
+  
+  def get_nested_constant
+    HELLO::WORLD
+  end
 end
 
 describe "Variable Assignment/Retrieval Reversal" do
@@ -97,6 +101,12 @@ def get_constant
   ALOHA
 end
 EOF
+
+    @get_nested_constant = DecompilationTestCase.new(A, :get_nested_constant, <<-EOF)
+def get_nested_constant
+  HELLO::WORLD
+end
+EOF
   end
   
   it "can decompile a method with simple local assignments" do
@@ -137,5 +147,9 @@ EOF
   
   it "can decompile the retrieval of a constant" do
     @get_constant.assert_correct
+  end
+  
+  it "can decompile a constant with a base" do
+    @get_nested_constant.assert_correct
   end
 end
