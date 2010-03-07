@@ -12,14 +12,6 @@ class A
     5.minutes()
   end
   
-  def uses_a_string
-    var = "a string"
-  end
-  
-  def interpolates_a_string
-    "hello #{world_method}"
-  end
-  
   def first_multiline(arg)
     hello = arg.crazy
     puts(hello)
@@ -59,18 +51,6 @@ def calls_a_method
 end
 EOF
 
-    @uses_a_string_case = DecompilationTestCase.new(A, :uses_a_string, <<-EOF)
-def uses_a_string
-  var = "a string"
-end
-EOF
-
-    @interpolates_a_string_case = DecompilationTestCase.new(A, :interpolates_a_string, <<-EOF)
-def interpolates_a_string
-  "hello " + (world_method).to_s
-end
-EOF
-
     @first_multiline_case = DecompilationTestCase.new(A, :first_multiline, <<-EOF)
 def first_multiline(arg)
   hello = arg.crazy
@@ -104,10 +84,6 @@ EOF
     @two_arg_case.assert_correct
   end
   
-  it "can decompile a simple expression with a string" do
-    @uses_a_string_case.assert_correct
-  end
-  
   it "can decompile a method being called" do
     @calls_a_method_case.assert_correct
   end
@@ -118,10 +94,6 @@ EOF
   
   it "decompiles chained methods appropriately" do
     @chained_method_case.assert_correct
-  end
-  
-  it "interpolates a simple string" do
-    @interpolates_a_string_case.assert_correct
   end
   
   it "decompiles a call to length" do
