@@ -142,6 +142,14 @@ module Reversal
     end
     
     ##
+    # If it's just top-level code, then there are no args - just decompile
+    # the body straight away
+    def decompile_class(iseq)
+      yield iseq
+    end
+    
+    
+    ##
     # Handle a send instruction in the bytecode
     def do_send(meth, argc, blockiseq, op_flag, ic, receiver = nil)
       # [:send, meth, argc, blockiseq, op_flag, inline_cache]
@@ -394,6 +402,29 @@ module Reversal
             when 0x05
               pop #useless nil
               push "redo"
+            end
+          
+          #############################
+          ###### Classes/Modules ######
+          #############################
+          when :defineclass
+            name, new_iseq, type = inst[1..-1]
+            superklass, base = pop, pop
+            superklass_as_str = (superklass == "nil" ? "" : " < #{superklass}")
+            new_reverser = Reverser.new(new_iseq, self)
+            case type
+            when 0 # class
+              wrap_and_indent("class #{name}#{superklass_as_str}", "end") do
+                add_line new_reverser.decompile
+              end
+            when 1
+              wrap_and_indent("class << #{base}", "end") do
+                add_line new_reverser.decompile
+              end
+            when 2
+              wrap_and_indent("module #{name}", "end") do
+                add_line new_reverser.decompile
+              end
             end
           
           #########################
