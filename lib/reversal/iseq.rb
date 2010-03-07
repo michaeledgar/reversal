@@ -78,10 +78,8 @@ module Reversal
       if arg_block > -1
         newargs[arg_block] = "&#{newargs[arg_block]}"
       end
-      if post_len > -1
-        1.upto(post_len) do |x|
-          newargs << self.locals[post_start + x - 1]
-        end
+      if arg_rest > -1
+        newargs[arg_rest] = "*#{self.locals[arg_rest]}"
       end
       newargs
     end

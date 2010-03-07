@@ -40,6 +40,14 @@ class A
   def has_block_param(arg, &blk)
     puts blk
   end
+  
+  def has_end_rest_arg(arg, *rest)
+    p rest
+  end
+  
+  def has_rest_in_middle(arg, *rest, another, second)
+    p second
+  end
 end
 
 describe "Method Reversal" do
@@ -102,6 +110,18 @@ def has_block_param(arg, &blk)
   puts(blk)
 end
 EOF
+    @has_end_rest_arg = DecompilationTestCase.new(A, :has_end_rest_arg, <<-EOF)
+def has_end_rest_arg(arg, *rest)
+  p(rest)
+end
+EOF
+
+    @has_rest_in_middle = DecompilationTestCase.new(A, :has_rest_in_middle, <<-EOF)
+def has_rest_in_middle(arg, *rest, another, second)
+  p(second)
+end
+EOF
+
   end
   
   it "can decompile a method with one positional argument" do
@@ -142,5 +162,13 @@ EOF
   
   it "decompiles methods with block parameters" do
     @has_block_param.assert_correct
+  end
+  
+  it "decompiles methods with a rest argument at the end" do
+    @has_end_rest_arg.assert_correct
+  end
+  
+  it "decompiles methods with a rest argument in the middle" do
+    @has_rest_in_middle.assert_correct
   end
 end
