@@ -14,6 +14,8 @@ module Reversal
       def new(*args)
         # extract the array that represents the instructionsequence
         case args.first
+        when SubclassableIseq
+          return args.first
         when RubyVM::InstructionSequence
           array = args.first.to_a
         when Array

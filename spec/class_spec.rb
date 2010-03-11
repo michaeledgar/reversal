@@ -22,6 +22,16 @@ class A
 end
 RESULT
 
+    @class_with_base = CompiledDecompilationTestCase.new <<CLASS, <<RESULT
+class B::C::A
+  attr_accessor :hello
+end
+CLASS
+class B::C::A
+  attr_accessor(:hello)
+end
+RESULT
+
     @simple_module = CompiledDecompilationTestCase.new <<CLASS, <<RESULT
 module A
   module_function :silly
@@ -42,6 +52,20 @@ class << self
 end
 RESULT
 
+    @class_with_method = CompiledDecompilationTestCase.new <<CLASS, <<RESULT
+class A
+  def silly
+    5
+  end
+end
+CLASS
+class A
+  def silly
+    5
+  end
+end
+RESULT
+
     
   end
   
@@ -53,11 +77,19 @@ RESULT
     @nonempty_class.assert_correct
   end
   
+  it "decompiles classes with bases" do
+    @class_with_base.assert_correct
+  end
+  
   it "decompiles a simple module" do
     @simple_module.assert_correct
   end
   
   it "decompiles access to singleton classes" do
     @simple_singleton_class.assert_correct
+  end
+  
+  it "decompiles a class with a method" do
+    @class_with_method.assert_correct
   end
 end

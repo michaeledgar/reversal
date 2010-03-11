@@ -33,6 +33,10 @@ class A
     super arg
   end
   
+  def use_super_implicitly(arg, other)
+    super
+  end
+  
   def use_yield(arg, another)
     yield another, arg
   end
@@ -100,6 +104,11 @@ def use_super(arg, other)
   super(arg)
 end
 EOF
+    @use_super_implicitly = DecompilationTestCase.new(A, :use_super_implicitly, <<-EOF)
+def use_super_implicitly(arg, other)
+  super
+end
+EOF
     @use_yield = DecompilationTestCase.new(A, :use_yield, <<-EOF)
 def use_yield(arg, another)
   yield(another, arg)
@@ -153,8 +162,12 @@ EOF
     @succ_test.assert_correct
   end
   
-  it "decompiles a call to super" do
+  it "decompiles a call to super with explicit arguments" do
     @use_super.assert_correct
+  end
+  
+  it "decompiles a call to super with implicit arguments" do
+    @use_super_implicitly.assert_correct
   end
   
   it "decompiles a call to yield" do

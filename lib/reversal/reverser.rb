@@ -9,7 +9,12 @@
 module Reversal
   class Reverser
     TAB_SIZE = 2
-    
+    OPERATOR_LOOKUP = {:opt_plus => "+", :opt_minus => "-", :opt_mult => "*", :opt_div => "/",
+                       :opt_mod => "%", :opt_eq => "==", :opt_neq => "!=", :opt_lt => "<",
+                       :opt_le => "<=", :opt_gt => ">", :opt_ge => ">=", :opt_ltlt => "<<",
+                       :opt_regexpmatch2 => "=~"}
+                       
+    ALL_INFIX = OPERATOR_LOOKUP.values + [:"<=>"]
     attr_accessor :locals, :parent, :indent
     
     def initialize(iseq, parent=nil)
@@ -148,6 +153,9 @@ module Reversal
       yield iseq
     end
     
+    def remove_useless_dup
+      pop unless @stack.empty?
+    end
     
     ##
     # Handle a send instruction in the bytecode
@@ -159,9 +167,21 @@ module Reversal
       
       if meth == :[]=
         result = "#{receiver}[#{args[0]}] = #{args[1]}"
-      elsif OPERATOR_LOOKUP.values.include?(meth.to_s)
+        # Useless duplication of assigned value means we need to pop it
+        remove_useless_dup
+      elsif ALL_INFIX.include?(meth.to_s)
         # did an operator sneak by as receiver.=~(arg) or something?
         result = "#{receiver} #{meth} #{args.first}"
+      elsif meth == :"core#define_method"
+        # args will be [iseq, name, receiver, scope_arg]
+        receiver, name, method_iseq = args
+        name = name[1..-1] if name[0,1] == ":" # cut off leading :
+        name = receiver.kind_of?(Integer) ? "#{name}" : "#{receiver}.#{name}"
+        method_iseq[5] = name
+        reverser = Reverser.new(method_iseq, self)
+        reverser.indent = @indent
+        reverser.decompile.split("\n").each {|x| push((" "*TAB_SIZE) + x)}
+        return
       else
         result = meth.to_s
         result = "#{receiver}.#{result}" if receiver != :implicit
@@ -179,10 +199,24 @@ module Reversal
       push result
     end
     
-    OPERATOR_LOOKUP = {:opt_plus => "+", :opt_minus => "-", :opt_mult => "*", :opt_div => "/",
-                       :opt_mod => "%", :opt_eq => "==", :opt_neq => "!=", :opt_lt => "<",
-                       :opt_le => "<=", :opt_gt => ">", :opt_ge => ">=", :opt_ltlt => "<<",
-                       :opt_regexpmatch2 => "=~"}
+    def do_super(argc, blockiseq, op_flag)
+      args = popn(argc)
+      explicit_args = (pop == "true")
+      
+      if explicit_args then result = "super(#{args.join(", ")})"
+      else result = "super"
+      end
+      
+      if blockiseq
+        # make a new reverser with a parent (for dynamic var lookups)
+        reverser = Reverser.new(blockiseq, self)
+        reverser.indent = @indent
+        result << reverser.decompile
+      end
+      
+      push result
+    end
+    
     TRACE_NEWLINE = 1
     TRACE_EXIT = 16
     def decompile_body(iseq, instruction = 0, stop = iseq.body.size)
@@ -191,6 +225,7 @@ module Reversal
       # loop back
       while instruction < stop do
         inst = iseq.body[instruction]
+        puts "Instruction #{instruction} #{inst.inspect} #{@stack.inspect}"
         case inst
         when Integer
           # x
@@ -234,15 +269,28 @@ module Reversal
           
           when :setlocal
             # [:setlocal, local_num]
-            push("#{locals[inst[1] - 1]} = #{pop}")
+            result = "#{locals[inst[1] - 1]} = #{pop}"
+            # for some reason, there seems to cause a :dup instruction to be inserted that fucks
+            # everything up. So i'll pop the return value.
+            remove_useless_dup
+            push(result)
+            
           when :setinstancevariable, :setglobal
             # [:setinstancevariable, :ivar_name_as_symbol]
             # [:setglobal, :global_name_as_symbol]
-            push("#{inst[1]} = #{pop}")
+            result = "#{inst[1]} = #{pop}"
+            # for some reason, there seems to cause a :dup instruction to be inserted that fucks
+            # everything up. So i'll pop the return value.
+            remove_useless_dup
+            push result
+            
           when :setconstant
             # [:setconstant, :const_name_as_symbol]
             name = inst[1]
             scoping_arg, value = pop, pop
+            # for some reason, there seems to cause a :dup instruction to be inserted that fucks
+            # everything up. So i'll pop the return value.
+            remove_useless_dup
             push("#{name} = #{value}")
             
           ###################
@@ -309,6 +357,10 @@ module Reversal
             # later
             push inst[1]
             
+            
+          when :putiseq
+            push inst[1]
+            
           ############################
           ##### Stack Manipulation ###
           ############################
@@ -371,7 +423,7 @@ module Reversal
           ##### Method Dispatch ########
           ##############################
           when :invokesuper
-            do_send :super, inst[1], inst[2], inst[3], inst[4], :implicit
+            do_super inst[1], inst[2], inst[3]
           when :invokeblock
             do_send :yield, inst[1], nil, inst[2], nil, :implicit
           when :send
@@ -415,20 +467,28 @@ module Reversal
             name, new_iseq, type = inst[1..-1]
             superklass, base = pop, pop
             superklass_as_str = (superklass == "nil" ? "" : " < #{superklass}")
+            base_as_str = (base.kind_of?(Fixnum) ? "" : "#{base}::")
             new_reverser = Reverser.new(new_iseq, self)
             case type
             when 0 # class
-              wrap_and_indent("class #{name}#{superklass_as_str}", "end") do
-                add_line new_reverser.decompile
-              end
+              push "class #{base_as_str}#{name}#{superklass_as_str}"
+                indent!
+                new_reverser.decompile.split("\n").each {|x| push((" " * @indent)+x.to_s)}
+                outdent!
+              push "end"
+
             when 1
-              wrap_and_indent("class << #{base}", "end") do
-                add_line new_reverser.decompile
-              end
+              push "class << #{base}"
+                indent!
+                new_reverser.decompile.split("\n").reverse.each {|x| push((" " * @indent)+x)}
+                outdent!
+              push "end"
             when 2
-              wrap_and_indent("module #{name}", "end") do
-                add_line new_reverser.decompile
-              end
+              push "module #{base_as_str}#{name}"
+                indent!
+                new_reverser.decompile.split("\n").reverse.each {|x| push((" " * @indent)+x)}
+                outdent!
+              push "end"
             end
           
           ###############################
@@ -445,15 +505,14 @@ module Reversal
             case inst[1]
             when TRACE_NEWLINE, TRACE_EXIT
               # new line
-              add_line pop if @stack.any?
             end
           when :leave
             # [:leave]
-            add_line pop if iseq.type != :method && @stack.any?
           end
         end
         instruction += 1
       end
+      @stack.each {|x| add_line x}
     end
     
   end
