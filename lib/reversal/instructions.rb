@@ -25,14 +25,7 @@ module Reversal
       end
 
       ## The rest of cases: either a normal method, a `def`, or an operator with a block
-      if meth == :[]=
-        remove_useless_dup
-        result = "#{receiver}[#{args[0]}] = #{args[1]}"
-      # If it's an infix method, make it look pretty.
-      elsif Reverser::ALL_INFIX.include?(meth.to_s)
-        result = "#{receiver} #{meth} #{args.first}"
-      # define_method is a little bit special - it's what's used when you do "def"
-      elsif meth == :"core#define_method" || meth == :"core#define_singleton_method"
+      if meth == :"core#define_method" || meth == :"core#define_singleton_method"
         # args will be [iseq, name, receiver, scope_arg]
         receiver, name, blockiseq = args
         name = name.to_s
@@ -42,6 +35,7 @@ module Reversal
         blockiseq[5] = name
       # normal method call
       else
+        remove_useless_dup if meth == :[]=
         result = meth.to_s
         result = "#{receiver}.#{result}" if receiver != :implicit
         result << (args.any? ? "(#{args.map {|a| a.to_s}.join(", ")})" : "")
