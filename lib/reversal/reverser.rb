@@ -177,7 +177,7 @@ module Reversal
       # loop back
       while instruction < stop do
         inst = iseq.body[instruction]
-        puts "Instruction #{instruction} #{inst.inspect} #{@stack.inspect}"
+        #puts "Instruction #{instruction} #{inst.inspect} #{@stack.inspect}"
         case inst
         when Integer
           # x

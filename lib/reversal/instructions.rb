@@ -288,7 +288,15 @@ module Reversal
       target = inst[1]
       forward = forward_jump?(line_no, target)
       if forward
-        push "if (#{pop})"
+        # elsif check
+        predicate = pop
+        if @stack.last.to_s.strip == "else"
+          pop
+          @end_stack.pop # one less end
+          push "elsif (#{predicate})"
+        else
+          push "if (#{predicate})"
+        end
         indent!
         @else_stack.push target
       end

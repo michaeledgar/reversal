@@ -32,16 +32,12 @@ CLASS
 def test(x)
   if (x)
     5
+  elsif (y)
+    10
+  elsif (z)
+    20
   else
-    if (y)
-      10
-    else
-      if (z)
-        20
-      else
-        nil
-      end
-    end
+    nil
   end
 end
 RESULT
