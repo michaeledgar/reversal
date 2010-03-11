@@ -17,7 +17,7 @@ module Reversal
     include Instructions
     
     TAB_SIZE = 2          
-    ALL_INFIX = OPERATOR_LOOKUP.values + [:"<=>"]
+    ALL_INFIX = OPERATOR_LOOKUP.values + ["<=>"]
     attr_accessor :locals, :parent, :indent
     
     def initialize(iseq, parent=nil)

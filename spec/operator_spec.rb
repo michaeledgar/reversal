@@ -64,6 +64,10 @@ class A
   def test_not(thing)
     !thing
   end
+  
+  def spaceship(a, b)
+    a <=> b
+  end
 end
 
 describe "Operator Reversal" do
@@ -156,6 +160,12 @@ def test_not(thing)
   !thing
 end
 EOF
+
+    @spaceship = DecompilationTestCase.new(A, :spaceship, <<-EOF)
+def spaceship(a, b)
+  a <=> b
+end
+EOF
   end
   
   it "can decompile a simple addition of local variables" do
@@ -220,5 +230,9 @@ EOF
   
   it "can decompile a simple not operator on a local variable" do
     @test_not.assert_correct
+  end
+  
+  it "can decompile the shapeship operator" do
+    @spaceship.assert_correct
   end
 end
