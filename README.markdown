@@ -1,5 +1,50 @@
 # reversal
 
+## Best result so far:
+
+This is the best test so far for a complicated decompilation. Reversal turns this:
+
+    module Hello
+      include SomeModule
+      class World < Universe
+        attr_accessor :name
+        self.attr_writer :moons
+        def initialize(some_thing, *args)
+          super
+          @name = some_thing.to_s
+        end
+
+        def orbit!(&blk)
+          @moons.each do |moon|
+            moon.rotate
+            moon.revolve! :twice
+            yield
+          end
+        end
+      end
+    end
+    
+into this:
+
+    module Hello
+      include(SomeModule)
+      class World < Universe
+        attr_accessor(:name)
+        self.attr_writer(:moons)
+        def initialize(some_thing, *args)
+          super
+          @name = some_thing.to_s
+        end
+        def orbit!(&blk)
+          @moons.each do |moon|
+            moon.rotate
+            moon.revolve!(:twice)
+            yield
+          end
+        end
+      end
+    end
+
 You will need a [tiny patch](http://github.com/michaeledgar/reversal/blob/master/iseq.c.patch) to your 
 interpreter for this to work.  I will be petitioning for this to be added to Ruby 1.9.2. The patch should be
 applied to iseq.c.
