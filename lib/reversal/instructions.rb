@@ -38,7 +38,7 @@ module Reversal
         name = name.to_s
         # alter name if necessary
         name = name[1..-1] if name[0,1] == ":" # cut off leading :
-        name = receiver.kind_of?(Integer) ? "#{name}" : "#{receiver}.#{name}"
+        name = (receiver.kind_of?(Integer) || receiver.fixnum?) ? "#{name}" : "#{receiver}.#{name}"
         blockiseq[5] = name
       # normal method call
       else
@@ -216,7 +216,7 @@ module Reversal
     def decompile_putspecialobject(inst, line_no)
       # these are for runtime checks - just put the number it asks for, and ignore it
       # later
-      push inst[1]
+      push r(:lit, inst[1])
     end
       
       
@@ -382,7 +382,7 @@ module Reversal
       name, new_iseq, type = inst[1..-1]
       superklass, base = pop, pop
       superklass_as_str = (superklass.nil? ? "" : " < #{superklass}")
-      base_as_str = (base.kind_of?(Fixnum) ? "" : "#{base}::")
+      base_as_str = (base.kind_of?(Fixnum) || base.fixnum? ? "" : "#{base}::")
       new_reverser = Reverser.new(new_iseq, self)
       case type
       when 0 # class

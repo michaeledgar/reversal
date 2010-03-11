@@ -19,6 +19,10 @@ module Reversal
       self.type == :lit && self[1] == true
     end
 
+    def fixnum?
+      self.type == :lit && self[1].is_a?(Fixnum)
+    end
+
     def to_s
       if self.respond_to?("to_s_#{self.type}".to_sym)
         send("to_s_#{self.type}".to_sym)
