@@ -13,11 +13,16 @@ This is the best test so far for a complicated decompilation. Reversal turns thi
           super
           @name = some_thing.to_s
         end
-
+    
         def orbit!(&blk)
           @moons.each do |moon|
             moon.rotate
             moon.revolve! :twice
+            class << moon
+              def crash_into(other_planet)
+                other_planet.go_boom!
+              end
+            end
             yield
           end
         end
@@ -39,6 +44,11 @@ into this:
           @moons.each do |moon|
             moon.rotate
             moon.revolve!(:twice)
+            class << moon
+              def crash_into(other_planet)
+                other_planet.go_boom!
+              end
+            end
             yield
           end
         end

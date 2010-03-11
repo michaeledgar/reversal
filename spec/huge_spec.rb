@@ -17,6 +17,11 @@ module Hello
       @moons.each do |moon|
         moon.rotate
         moon.revolve! :twice
+        class << moon
+          def crash_into(other_planet)
+            other_planet.go_boom!
+          end
+        end
         yield
       end
     end
@@ -36,6 +41,11 @@ module Hello
       @moons.each do |moon|
         moon.rotate
         moon.revolve!(:twice)
+        class << moon
+          def crash_into(other_planet)
+            other_planet.go_boom!
+          end
+        end
         yield
       end
     end

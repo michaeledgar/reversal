@@ -329,9 +329,7 @@ module Reversal
       when 2
         push "module #{base_as_str}#{name}"
       end
-      indented do
-        new_reverser.decompile.split("\n").each {|x| push((" " * @indent)+x)}
-      end
+      new_reverser.decompile.split("\n").each {|x| push((" " * Reverser::TAB_SIZE)+x)}
       push "end"
     end
     
