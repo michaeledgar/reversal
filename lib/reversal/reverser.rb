@@ -249,6 +249,39 @@ module Reversal
       end
     end
     
+    #############################
+    ##### Variable Assignment ###
+    #############################
+    def decompile_setlocal(inst, labels)
+      # [:setlocal, local_num]
+      result = "#{locals[inst[1] - 1]} = #{pop}"
+      # for some reason, there seems to cause a :dup instruction to be inserted that fucks
+      # everything up. So i'll pop the return value.
+      remove_useless_dup
+      push(result)
+    end
+      
+    def decompile_setinstancevariable(inst, labels)
+      # [:setinstancevariable, :ivar_name_as_symbol]
+      # [:setglobal, :global_name_as_symbol]
+      result = "#{inst[1]} = #{pop}"
+      # for some reason, there seems to cause a :dup instruction to be inserted that fucks
+      # everything up. So i'll pop the return value.
+      remove_useless_dup
+      push result
+    end
+    alias_method :decompile_setglobal, :decompile_setinstancevariable
+      
+    def decompile_setconstant(inst, labels)
+      # [:setconstant, :const_name_as_symbol]
+      name = inst[1]
+      scoping_arg, value = pop, pop
+      # for some reason, there seems to cause a :dup instruction to be inserted that fucks
+      # everything up. So i'll pop the return value.
+      remove_useless_dup
+      push("#{name} = #{value}")
+    end
+    
     TRACE_NEWLINE = 1
     TRACE_EXIT = 16
     def decompile_body(iseq, instruction = 0, stop = iseq.body.size)
@@ -257,7 +290,7 @@ module Reversal
       # loop back
       while instruction < stop do
         inst = iseq.body[instruction]
-        puts "Instruction #{instruction} #{inst.inspect} #{@stack.inspect}"
+        #puts "Instruction #{instruction} #{inst.inspect} #{@stack.inspect}"
         case inst
         when Integer
           # x
@@ -268,36 +301,6 @@ module Reversal
         when Array
           case inst.first            
 
-          #############################
-          ##### Variable Assignment ###
-          #############################
-          
-          when :setlocal
-            # [:setlocal, local_num]
-            result = "#{locals[inst[1] - 1]} = #{pop}"
-            # for some reason, there seems to cause a :dup instruction to be inserted that fucks
-            # everything up. So i'll pop the return value.
-            remove_useless_dup
-            push(result)
-            
-          when :setinstancevariable, :setglobal
-            # [:setinstancevariable, :ivar_name_as_symbol]
-            # [:setglobal, :global_name_as_symbol]
-            result = "#{inst[1]} = #{pop}"
-            # for some reason, there seems to cause a :dup instruction to be inserted that fucks
-            # everything up. So i'll pop the return value.
-            remove_useless_dup
-            push result
-            
-          when :setconstant
-            # [:setconstant, :const_name_as_symbol]
-            name = inst[1]
-            scoping_arg, value = pop, pop
-            # for some reason, there seems to cause a :dup instruction to be inserted that fucks
-            # everything up. So i'll pop the return value.
-            remove_useless_dup
-            push("#{name} = #{value}")
-            
           ###################
           ##### Strings #####
           ###################
