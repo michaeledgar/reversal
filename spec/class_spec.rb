@@ -92,6 +92,34 @@ class A
 end
 RESULT
 
+    @longer_singleton_class = CompiledDecompilationTestCase.new <<CLASS, <<RESULT
+class << self
+  x = self
+  push x
+  map x
+end
+CLASS
+class << self
+  x = self
+  push(x)
+  map(x)
+end
+RESULT
+
+    @longer_module = CompiledDecompilationTestCase.new <<CLASS, <<RESULT
+module Hello
+  x = self
+  push x
+  map x
+end
+CLASS
+module Hello
+  x = self
+  push(x)
+  map(x)
+end
+RESULT
+
     
   end
   
@@ -125,5 +153,13 @@ RESULT
   
   it "decompiles a class calling `include`" do
     @class_include_call.assert_correct
+  end
+  
+  it "decompiles longer singleton classes" do
+    @longer_singleton_class.assert_correct
+  end
+  
+  it "decompiles longer modules" do
+    @longer_module.assert_correct
   end
 end
