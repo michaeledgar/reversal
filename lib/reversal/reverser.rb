@@ -172,7 +172,7 @@ module Reversal
       elsif ALL_INFIX.include?(meth.to_s)
         # did an operator sneak by as receiver.=~(arg) or something?
         result = "#{receiver} #{meth} #{args.first}"
-      elsif meth == :"core#define_method"
+      elsif meth == :"core#define_method" || meth == :"core#define_singleton_method"
         # args will be [iseq, name, receiver, scope_arg]
         receiver, name, method_iseq = args
         name = name[1..-1] if name[0,1] == ":" # cut off leading :

@@ -66,6 +66,20 @@ class A
 end
 RESULT
 
+    @class_with_singleton_method = CompiledDecompilationTestCase.new <<CLASS, <<RESULT
+class A
+  def self.silly
+    5
+  end
+end
+CLASS
+class A
+  def self.silly
+    5
+  end
+end
+RESULT
+
     
   end
   
@@ -91,5 +105,9 @@ RESULT
   
   it "decompiles a class with a method" do
     @class_with_method.assert_correct
+  end
+  
+  it "decompiles a class with a singleton method (`def self.meth` syntax)" do
+    @class_with_singleton_method.assert_correct
   end
 end
