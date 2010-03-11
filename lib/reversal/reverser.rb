@@ -216,6 +216,39 @@ module Reversal
       push result
     end
     
+    #############################
+    ###### Variable Lookup ######
+    #############################
+    def decompile_getlocal(inst, labels)
+      push get_local(inst[1])
+    end
+    
+    def decompile_getinstancevariable(inst, labels)
+      push inst[1]
+    end
+    alias_method :decompile_getglobal, :decompile_getinstancevariable
+    
+    def decompile_getconstant(inst, labels)
+      base = pop
+      base_str = base == "nil" ? "" : "#{base}::"
+      push "#{base_str}#{inst[1]}"
+    end
+    
+    def decompile_getdynamic(inst, labels)
+      push get_dynamic(inst[1], inst[2])
+    end
+    
+    def decompile_getspecial(inst, labels)
+      key, type = inst[1..2]
+      if type == 0
+        # some weird shit i don't get
+      elsif (type & 0x01 > 0)
+        push "$#{(type >> 1).chr}"
+      else
+        push "$#{(type >> 1)}"
+      end
+    end
+    
     TRACE_NEWLINE = 1
     TRACE_EXIT = 16
     def decompile_body(iseq, instruction = 0, stop = iseq.body.size)
@@ -234,34 +267,7 @@ module Reversal
           labels[inst] = instruction
         when Array
           case inst.first            
-          #############################
-          ###### Variable Lookup ######
-          #############################
-          
-          when :getlocal
-            # [:getlocal, local_num]
-            push get_local(inst[1])
-          when :getinstancevariable, :getglobal
-            # [:getinstancevariable, :ivar_name_as_symbol]
-            # [:getglobal, :global_name_as_symbol]
-            push inst[1]
-          when :getconstant
-            # [:getconstant, :constant_name_as_symbol]
-            base = pop
-            base_str = base == "nil" ? "" : "#{base}::"
-            push "#{base_str}#{inst[1]}"
-          when :getdynamic
-            push get_dynamic(inst[1], inst[2])
-          when :getspecial
-            key, type = inst[1..2]
-            if type == 0
-              # some weird shit i don't get
-            elsif (type & 0x01 > 0)
-              push "$#{(type >> 1).chr}"
-            else
-              push "$#{(type >> 1)}"
-            end
-            
+
           #############################
           ##### Variable Assignment ###
           #############################
@@ -507,6 +513,8 @@ module Reversal
             end
           when :leave
             # [:leave]
+          else
+            send("decompile_#{inst.first}".to_sym, inst, labels) if respond_to?("decompile_#{inst.first}".to_sym)
           end
         end
         instruction += 1
