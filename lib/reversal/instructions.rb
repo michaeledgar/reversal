@@ -9,14 +9,27 @@ module Reversal
       receiver = :implicit if receiver.is_a?(Sexp) && receiver.type == :nil
       result = ""
       
-      # Weird special case, as far as syntax goes.
+      # Special operator cases. Weird, but keep in mind the oddity of
+      # using an operator with a block!
+      #
+      # receiver.[]=(key, val) {|blockarg| ...} is possible!!!
+      if !blockiseq
+        if meth == :[]=
+          remove_useless_dup
+          push r(:aset, receiver, args[0], args[1])
+          return
+        elsif Reverser::ALL_INFIX.include?(meth.to_s)
+          push r(:infix, meth, [receiver, args.first])
+          return
+        end
+      end
+
+      ## The rest of cases: either a normal method, a `def`, or an operator with a block
       if meth == :[]=
-        result = "#{receiver}[#{args[0]}] = #{args[1]}"
-        # Useless duplication of assigned value means we need to pop it
         remove_useless_dup
+        result = "#{receiver}[#{args[0]}] = #{args[1]}"
       # If it's an infix method, make it look pretty.
       elsif Reverser::ALL_INFIX.include?(meth.to_s)
-        # did an operator sneak by as receiver.=~(arg) or something?
         result = "#{receiver} #{meth} #{args.first}"
       # define_method is a little bit special - it's what's used when you do "def"
       elsif meth == :"core#define_method" || meth == :"core#define_singleton_method"
@@ -245,12 +258,12 @@ module Reversal
     def decompile_opt_aref(inst, line_no)
       # [:opt_aref]
       key, receiver = pop, pop
-      push "#{receiver}[#{key}]"
+      push r(:aref, receiver, key)
     end
     def decompile_opt_aset(inst, line_no)
       # [:opt_aset]
       new_val, key, receiver = pop, pop, pop
-      push "#{receiver}[#{key}] = #{new_val}"
+      push r(:aset, receiver, key, new_val)
     end
     def decompile_opt_not(inst, line_no)
       # [:opt_not]
@@ -390,7 +403,7 @@ module Reversal
     
     def decompile_operator(inst, line_no)
       arg, receiver = pop, pop
-      push "#{receiver} #{Reverser::OPERATOR_LOOKUP[inst.first]} #{arg}"
+      push r(:infix, Reverser::OPERATOR_LOOKUP[inst.first], [receiver, arg])
     end
     
     Reverser::OPERATOR_LOOKUP.keys.each do |operator|

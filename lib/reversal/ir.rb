@@ -7,6 +7,10 @@ module Reversal
       self[1..-1]
     end
 
+    def simple?
+      ![:infix, :if, :else, :send, :setvar, :aset].include?(self.type)
+    end
+
     def nil?
       self.type == :nil
     end
@@ -50,7 +54,12 @@ module Reversal
 
     def to_s_infix
       operator, args  = self[1], self[2]
-      "(" + args.map {|a| a.to_s}.join(" #{operator} ") + ")"
+      need_parens = (args.all? {|x| x.is_a?(Sexp) && x.simple?})
+      if need_parens
+        args.map {|a| a.to_s}.join(" #{operator} ")
+      else
+        "(" + args.map {|a| a.to_s}.join(" #{operator} ") + ")"
+      end
     end
 
     def to_s_hash
@@ -65,6 +74,14 @@ module Reversal
 
     def to_s_not
       "!#{self[1]}"
+    end
+
+    def to_s_aref
+      "#{self[1]}[#{self[2]}]"
+    end
+
+    def to_s_aset
+      "#{self[1]}[#{self[2]}] = #{self[3]}"
     end
   end
 end
