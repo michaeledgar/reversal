@@ -6,9 +6,7 @@ module Reversal
       # [:send, meth, argc, blockiseq, op_flag, inline_cache]
       args = popn(argc)
       receiver ||= pop
-      receiver = :implicit if receiver.is_a?(Sexp) && receiver.type == :nil
-      result = ""
-      
+      receiver = :implicit if receiver.nil?
       # Special operator cases. Weird, but keep in mind the oddity of
       # using an operator with a block!
       #
@@ -23,33 +21,18 @@ module Reversal
           return
         end
       end
-
       ## The rest of cases: either a normal method, a `def`, or an operator with a block
       if meth == :"core#define_method" || meth == :"core#define_singleton_method"
         # args will be [iseq, name, receiver, scope_arg]
         receiver, name, blockiseq = args
-        name = name.to_s
-        # alter name if necessary
-        name = name[1..-1] if name[0,1] == ":" # cut off leading :
-        name = (receiver.kind_of?(Integer) || receiver.fixnum?) ? "#{name}" : "#{receiver}.#{name}"
-        blockiseq[5] = name
+        push r(:defmethod, receiver, name, blockiseq, self)
+        return
       # normal method call
       else
         remove_useless_dup if meth == :[]=
-        result = meth.to_s
-        result = "#{receiver}.#{result}" if receiver != :implicit
-        result << (args.any? ? "(#{args.map {|a| a.to_s}.join(", ")})" : "")
+        push r(:send, meth, receiver, args, blockiseq, self) # self arg needed for closures
+        return
       end
-      
-      # handle if it has a block
-      if blockiseq
-        # make a new reverser with a parent (for dynamic var lookups)
-        reverser = Reverser.new(blockiseq, self)
-        reverser.indent = @indent
-        result << reverser.decompile
-      end
-      
-      push result
     end
     
     def do_super(argc, blockiseq, op_flag)

@@ -46,7 +46,11 @@ module Reversal
     def outdent!
       @indent = [0, @indent - TAB_SIZE].max
     end
-    
+
+    def indent_size
+      TAB_SIZE
+    end
+
     ##
     # Adds a line with the proper indentation
     def add_line(line, indent = true)

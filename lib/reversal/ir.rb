@@ -91,6 +91,35 @@ module Reversal
     def to_s_aset
       "#{self[1]}[#{self[2]}] = #{self[3]}"
     end
+
+    def to_s_defmethod
+      receiver, name, blockiseq, parent = self.body
+      result = ""
+      name = name.to_s
+      # alter name if necessary
+      name = name[1..-1] if name[0,1] == ":" # cut off leading :
+      name = (receiver.kind_of?(Integer) || receiver.fixnum?) ? "#{name}" : "#{receiver}.#{name}"
+      blockiseq[5] = name
+
+      reverser = Reverser.new(blockiseq, parent)
+      reverser.indent = 0
+      result << reverser.decompile
+    end
+
+    def to_s_send
+      meth, receiver, args, blockiseq, parent = self.body
+      result = meth.to_s
+      result = "#{receiver}.#{result}" unless receiver == :implicit
+      result << (args.any? ? "(#{args.map {|a| a.to_s}.join(", ")})" : "")
+
+      if blockiseq
+        # make a new reverser with a parent (for dynamic var lookups)
+        reverser = Reverser.new(blockiseq, parent)
+        reverser.indent = parent.indent_size
+        result << reverser.decompile
+      end
+      result
+    end
   end
 end
 
