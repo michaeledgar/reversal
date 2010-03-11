@@ -50,10 +50,10 @@ def test(x)
 end
 CLASS
 def test(x)
-  unless (x)
-    5
-  else
+  if (x)
     nil
+  else
+    5
   end
 end
 RESULT
