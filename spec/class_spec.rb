@@ -80,6 +80,18 @@ class A
 end
 RESULT
 
+    @class_include_call = CompiledDecompilationTestCase.new <<CLASS, <<RESULT
+class A
+  include SomeModule
+  extend AnotherModule
+end
+CLASS
+class A
+  include(SomeModule)
+  extend(AnotherModule)
+end
+RESULT
+
     
   end
   
@@ -109,5 +121,9 @@ RESULT
   
   it "decompiles a class with a singleton method (`def self.meth` syntax)" do
     @class_with_singleton_method.assert_correct
+  end
+  
+  it "decompiles a class calling `include`" do
+    @class_include_call.assert_correct
   end
 end
