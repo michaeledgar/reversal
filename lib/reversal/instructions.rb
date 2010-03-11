@@ -60,7 +60,8 @@ module Reversal
     
     def do_super(argc, blockiseq, op_flag)
       args = popn(argc)
-      explicit_args = (pop == "true")
+      explicit_check = pop
+      explicit_args = explicit_check.true?
       
       if explicit_args then result = "super(#{args.map {|a| a.to_s}.join(", ")})"
       else result = "super"

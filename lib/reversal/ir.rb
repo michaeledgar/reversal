@@ -15,6 +15,10 @@ module Reversal
       self.type == :nil
     end
 
+    def true?
+      self.type == :lit && self[1] == true
+    end
+
     def to_s
       if self.respond_to?("to_s_#{self.type}".to_sym)
         send("to_s_#{self.type}".to_sym)
