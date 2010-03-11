@@ -332,13 +332,13 @@ module Reversal
       when 1
         push "class << #{base}"
         indented do
-          new_reverser.decompile.split("\n").reverse.each {|x| push((" " * @indent)+x)}
+          new_reverser.decompile.split("\n").each {|x| push((" " * @indent)+x)}
         end
         push "end"
       when 2
         push "module #{base_as_str}#{name}"
         indented do
-          new_reverser.decompile.split("\n").reverse.each {|x| push((" " * @indent)+x)}
+          new_reverser.decompile.split("\n").each {|x| push((" " * @indent)+x)}
         end
         push "end"
       end
