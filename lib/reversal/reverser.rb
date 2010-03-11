@@ -282,6 +282,120 @@ module Reversal
       push("#{name} = #{value}")
     end
     
+    
+    ###################
+    ##### Strings #####
+    ###################
+    def decompile_putstring(inst, labels)
+      push "\"#{inst[1]}\""
+    end
+    
+    def decompile_tostring(inst, labels)
+      push "(#{pop}).to_s"
+    end
+    
+    def decompile_concatstrings(inst, labels)
+      amt = inst[1]
+      push pop(amt).join(" + ")
+    end
+    
+    ##################
+    ### Arrays #######
+    ##################
+    
+    def decompile_duparray(inst, labels)
+      push inst[1]
+    end
+    
+    
+    def decompile_newarray(inst, labels)
+      # [:newarray, num_to_pop]
+      arr = popn(inst[1])
+      push("[#{arr.join(", ")}]")
+    end
+    def decompile_splatarray(inst, labels)
+      # [:splatarray]
+      push "*#{pop}"
+    end
+    def decompile_concatarray(inst, labels)
+      # [:concatarray, ignored_boolean_flag]
+      arg, receiver = pop, pop
+      receiver = receiver[1..-1] if (receiver[0, 1]) == "*"
+      push "(#{receiver} + #{arg})"
+    end
+      
+    ###################
+    ### Ranges ########
+    ###################
+    def decompile_newrange(inst, labels)
+      # [:newrange, exclusive_if_1]
+      last, first = pop, pop
+      exclusive = (inst[1] == 1)
+      result = exclusive ? "(#{first}...#{last})" : "(#{first}..#{last})"
+      push result
+    end
+      
+    ##############
+    ## Hashes ####
+    ##############
+    def decompile_newhash(inst, labels)
+      # [:newhash, number_to_pop]
+      list = []
+      0.step(inst[1] - 2, 2) do
+        list.unshift [pop, pop].reverse
+      end
+      list.map! {|(k, v)| "#{k} => #{v}" }
+      push "{#{list.join(', ')}}"
+    end
+    
+    #######################
+    #### Weird Stuff ######
+    #######################
+    def decompile_putspecialobject(inst, labels)
+      # these are for runtime checks - just put the number it asks for, and ignore it
+      # later
+      push inst[1]
+    end
+      
+      
+    def decompile_putiseq(inst, labels)
+      push inst[1]
+    end
+      
+    ############################
+    ##### Stack Manipulation ###
+    ############################
+    def decompile_setn(inst, labels)
+      # [:setn, num_to_move]
+      amt = inst[1]
+      val = pop
+      @stack[-amt] = val
+      push val
+    end
+    def decompile_dup(inst, labels)
+      # [:dup]
+      val = pop
+      push val
+      push val
+    end
+    def decompile_putobject(inst, labels)
+      # [:putobject, literal]
+      push inst[1].inspect
+    end
+    def decompile_putself(inst, labels)
+      # [:putself]
+      push "self"
+    end
+    def decompile_putnil(inst, labels)
+      # [:putnil]
+      push "nil"
+    end
+    def decompile_swap(inst, labels)
+      a, b = pop, pop
+      push b
+      push a
+    end
+      
     TRACE_NEWLINE = 1
     TRACE_EXIT = 16
     def decompile_body(iseq, instruction = 0, stop = iseq.body.size)
@@ -301,103 +415,8 @@ module Reversal
         when Array
           case inst.first            
 
-          ###################
-          ##### Strings #####
-          ###################
-          
-          when :putstring
-            # [:putstring, "the string to push"]
-            push "\"#{inst[1]}\""
-          when :tostring
-            # [:tostring]
-            push "(#{pop}).to_s"
-          when :concatstrings
-            # [:concatstrings, num_strings_to_pop_and_join]
-            amt = inst[1]
-            push pop(amt).join(" + ")
-          
-          ##################
-          ### Arrays #######
-          ##################
-          when :duparray
-            # [:duparray, [array, here]]
-            push inst[1]
-          when :newarray
-            # [:newarray, num_to_pop]
-            arr = popn(inst[1])
-            push("[#{arr.join(", ")}]")
-          when :splatarray
-            # [:splatarray]
-            push "*#{pop}"
-          when :concatarray
-            # [:concatarray, ignored_boolean_flag]
-            arg, receiver = pop, pop
-            receiver = receiver[1..-1] if (receiver[0, 1]) == "*"
-            push "(#{receiver} + #{arg})"
             
-          ###################
-          ### Ranges ########
-          ###################
-          when :newrange
-            # [:newrange, exclusive_if_1]
-            last, first = pop, pop
-            exclusive = (inst[1] == 1)
-            result = exclusive ? "(#{first}...#{last})" : "(#{first}..#{last})"
-            push result
-            
-          ##############
-          ## Hashes ####
-          ##############
-          when :newhash
-            # [:newhash, number_to_pop]
-            list = []
-            0.step(inst[1] - 2, 2) do
-              list.unshift [pop, pop].reverse
-            end
-            list.map! {|(k, v)| "#{k} => #{v}" }
-            push "{#{list.join(', ')}}"
-          
-          #######################
-          #### Weird Stuff ######
-          #######################
-          when :putspecialobject
-            # these are for runtime checks - just put the number it asks for, and ignore it
-            # later
-            push inst[1]
-            
-            
-          when :putiseq
-            push inst[1]
-            
-          ############################
-          ##### Stack Manipulation ###
-          ############################
-          when :setn
-            # [:setn, num_to_move]
-            amt = inst[1]
-            val = pop
-            @stack[-amt] = val
-            push val
-          when :dup
-            # [:dup]
-            val = pop
-            push val
-            push val
-          when :putobject
-            # [:putobject, literal]
-            push inst[1].inspect
-          when :putself
-            # [:putself]
-            push "self"
-          when :putnil
-            # [:putnil]
-            push "nil"
-          when :swap
-            a, b = pop, pop
-            push b
-            push a
-          # when :pop
-          #   pop
+
             
           ####################
           #### Operators #####
