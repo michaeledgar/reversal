@@ -172,7 +172,7 @@ module Reversal
     def decompile_newarray(inst, line_no)
       # [:newarray, num_to_pop]
       arr = popn(inst[1])
-      push("[#{arr.join(", ")}]")
+      push("[#{arr.map {|a| a.to_s}.join(", ")}]")
     end
     def decompile_splatarray(inst, line_no)
       # [:splatarray]
@@ -181,7 +181,9 @@ module Reversal
     def decompile_concatarray(inst, line_no)
       # [:concatarray, ignored_boolean_flag]
       arg, receiver = pop, pop
-      receiver = receiver[1..-1] if (receiver[0, 1] == "*")
+      if receiver.type == :splat
+        receiver = receiver[1]
+      end
       push r(:infix, :+, [receiver, arg])
     end
       

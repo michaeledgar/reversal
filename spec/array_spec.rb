@@ -50,7 +50,7 @@ EOF
     # not yet an optimal decompilation
     @splatted_array = DecompilationTestCase.new(A, :splatted_array, <<-EOF)
 def splatted_array(arr)
-  (arr + [1, 2])
+  arr + [1, 2]
 end
 EOF
 
