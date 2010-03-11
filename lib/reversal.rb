@@ -7,6 +7,10 @@
 
 $:.unshift(File.dirname(__FILE__))
 
+module Reversal
+  autoload :Instructions, "reversal/instructions"
+end
+
 require 'reversal/iseq'
 require 'reversal/reverser'
 
