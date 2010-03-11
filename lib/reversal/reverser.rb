@@ -35,6 +35,8 @@ module Reversal
       
       @current_line = 0
       @stack = []
+      @else_stack = []
+      @end_stack  = []
     end
     
     def indent!
@@ -163,8 +165,14 @@ module Reversal
     TRACE_NEWLINE = 1
     TRACE_EXIT = 16
     
+    def forward_jump?(current, label)
+      @iseq.labels[label] && @iseq.labels[label] > current
+    end
+    def backward_jump?(current, label)
+      !forward_jump?(current, label)
+    end
+    
     def decompile_body(iseq, instruction = 0, stop = iseq.body.size)
-      labels = {}
       # for now, using non-idiomatic while loop bc of a chance we might need to
       # loop back
       while instruction < stop do
@@ -176,11 +184,15 @@ module Reversal
           @current_line = inst
         when Symbol
           # :label_y
-          labels[inst] = instruction
+          while inst == @end_stack.last do
+            @end_stack.pop
+            outdent!
+            push "end"
+          end
         when Array
           # [:instruction, *args]
           # call "decompile_#{instruction}"
-          send("decompile_#{inst.first}".to_sym, inst, labels) if respond_to?("decompile_#{inst.first}".to_sym)
+          send("decompile_#{inst.first}".to_sym, inst, instruction) if respond_to?("decompile_#{inst.first}".to_sym)
         end
         instruction += 1
       end

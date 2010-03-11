@@ -16,6 +16,12 @@ class DecompilationTestCase
   def assert_correct
     @reverser.decompile.should.equal @result
   end
+  
+  def assert_correct_ignoring_indentation
+    decompiled = @reverser.decompile.split("\n").map {|x| x.lstrip}.join("\n")
+    result     = @result.split("\n").map {|x| x.lstrip}.join("\n")
+    decompiled.should.equal result
+  end
 end
 
 class CompiledDecompilationTestCase < DecompilationTestCase
