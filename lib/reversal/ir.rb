@@ -1,11 +1,76 @@
 module Reversal
   class Sexp < Array
-    
+    def type
+      self.first
+    end
+    def body
+      self[1..-1]
+    end
+
+    def nil?
+      self.type == :nil
+    end
+
+    def to_s
+      if self.respond_to?("to_s_#{self.type}".to_sym)
+        send("to_s_#{self.type}".to_sym)
+      else
+        super
+      end
+    end
+
+    ####### to_s methods #########
+    def to_s_lit
+      # [:lit, 5]
+      self[1].inspect
+    end
+
+    def to_s_getvar
+      # [:getvar, :HELLO]
+      # [:getvar, :@hello]
+      self[1].to_s
+    end
+
+    def to_s_setvar
+      "#{self[1]} = #{self[2]}"
+    end
+
+    def to_s_splat
+      "*#{self[1]}"
+    end
+
+    def to_s_range
+      start, stop, flag = self[1..-1]
+      if flag # inclusive?
+        "(#{start}..#{stop})"
+      else
+        "(#{start}...#{stop})"
+      end
+    end
+
+    def to_s_infix
+      operator, args  = self[1], self[2]
+      "(" + args.map {|a| a.to_s}.join(" #{operator} ") + ")"
+    end
+
+    def to_s_hash
+      list = self[1]
+      list.map! {|(k, v)| "#{k} => #{v}" }
+      "{#{list.join(', ')}}"
+    end
+
+    def to_s_nil
+      "nil"
+    end
+
+    def to_s_not
+      "!#{self[1]}"
+    end
   end
 end
 
 module Kernel
   def r(*args)
-    Sexp.new(args)
+    Reversal::Sexp.new(args)
   end
 end
