@@ -324,24 +324,15 @@ module Reversal
       case type
       when 0 # class
         push "class #{base_as_str}#{name}#{superklass_as_str}"
-        indented do
-          new_reverser.decompile.split("\n").each {|x| push((" " * @indent)+x.to_s)}
-        end
-        push "end"
-
       when 1
         push "class << #{base}"
-        indented do
-          new_reverser.decompile.split("\n").each {|x| push((" " * @indent)+x)}
-        end
-        push "end"
       when 2
         push "module #{base_as_str}#{name}"
-        indented do
-          new_reverser.decompile.split("\n").each {|x| push((" " * @indent)+x)}
-        end
-        push "end"
       end
+      indented do
+        new_reverser.decompile.split("\n").each {|x| push((" " * @indent)+x)}
+      end
+      push "end"
     end
     
     ###############################
