@@ -302,6 +302,18 @@ module Reversal
       end
     end
     
+    def decompile_branchif(inst, line_no)
+      target = inst[1]
+      forward = forward_jump?(line_no, target)
+      if forward
+        # no elsif check
+        predicate = pop
+        push "unless (#{predicate})"
+        indent!
+        @else_stack.push target
+      end
+    end
+    
     def decompile_jump(inst, line_no)
       target = inst[1]
       forward = forward_jump?(line_no, target)

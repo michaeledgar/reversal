@@ -41,6 +41,22 @@ def test(x)
   end
 end
 RESULT
+
+    @single_unless = CompiledDecompilationTestCase.new <<CLASS, <<RESULT
+def test(x)
+  unless x
+    5
+  end
+end
+CLASS
+def test(x)
+  unless (x)
+    5
+  else
+    nil
+  end
+end
+RESULT
   end
   
   it "can decompile a single if statement" do
@@ -49,5 +65,9 @@ RESULT
   
   it "can decompile elsif branches (albeit in an ugly manner)" do
     @elsif_branches.assert_correct_ignoring_indentation
+  end
+  
+  it "can decompile a simple unless statement" do
+    @single_unless.assert_correct_ignoring_indentation
   end
 end
