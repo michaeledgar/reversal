@@ -179,8 +179,7 @@ module Reversal
         name = receiver.kind_of?(Integer) ? "#{name}" : "#{receiver}.#{name}"
         method_iseq[5] = name
         reverser = Reverser.new(method_iseq, self)
-        reverser.indent = @indent
-        reverser.decompile.split("\n").each {|x| push((" "*TAB_SIZE) + x)}
+        reverser.decompile.split("\n").each {|x| push((" "*@indent) + x)}
         return
       else
         result = meth.to_s
@@ -225,7 +224,7 @@ module Reversal
       # loop back
       while instruction < stop do
         inst = iseq.body[instruction]
-        #puts "Instruction #{instruction} #{inst.inspect} #{@stack.inspect}"
+        puts "Instruction #{instruction} #{inst.inspect} #{@stack.inspect}"
         case inst
         when Integer
           # x
