@@ -11,6 +11,7 @@ module Reversal
   autoload :Instructions, "reversal/instructions"
 end
 
+require 'reversal/ir'
 require 'reversal/iseq'
 require 'reversal/reverser'
 
