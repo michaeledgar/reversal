@@ -20,6 +20,10 @@ class A
   def splatted_array(arr)
     [*arr, 1, 2]
   end
+  
+  def word_syntax_array
+    %w[hello world "michael"]
+  end
 
 end
 
@@ -53,6 +57,11 @@ def splatted_array(arr)
   arr + [1, 2]
 end
 EOF
+    @word_syntax_array = DecompilationTestCase.new(A, :word_syntax_array, <<-EOF)
+def word_syntax_array
+  ["hello", "world", "\\"michael\\""]
+end
+EOF
 
   end
 
@@ -74,5 +83,9 @@ EOF
   
   it "can handle an array splatted into a literal array" do
     @splatted_array.assert_correct
+  end
+  
+  it "can break up %w[] syntax arrays" do
+    @word_syntax_array.assert_correct
   end
 end
