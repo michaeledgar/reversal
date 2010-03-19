@@ -50,7 +50,7 @@ EOF
     @returns_from_block_with_value = DecompilationTestCase.new(A, :returns_from_block_with_value, <<-EOF)
 def returns_from_block_with_value(b)
   b.each do |x|
-    return x
+    return(x)
   end
 end
 EOF
@@ -58,7 +58,7 @@ EOF
     @breaks_from_block_with_value = DecompilationTestCase.new(A, :breaks_from_block_with_value, <<-EOF)
 def breaks_from_block_with_value(b)
   b.each do |x|
-    break x
+    break(x)
   end
 end
 EOF

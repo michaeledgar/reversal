@@ -1,5 +1,11 @@
 module Reversal
   module Instructions
+    # Send a message without much fanfare. Just a receiver, a method,
+    # and maybe some args.     Maybe a block too.
+    def do_simple_send(receiver, meth, args = [], block = nil)
+      push r(:send, meth, receiver, args, block, self)
+    end
+
     ##
     # Handle a send instruction in the bytecode
     def do_send(meth, argc, blockiseq, op_flag, ic, receiver = nil)
@@ -30,7 +36,7 @@ module Reversal
       # normal method call
       else
         remove_useless_dup if meth == :[]=
-        push r(:send, meth, receiver, args, blockiseq, self) # self arg needed for closures
+        do_simple_send(receiver, meth, args, blockiseq)
         return
       end
     end
@@ -40,7 +46,7 @@ module Reversal
       explicit_check = pop
       explicit_args = explicit_check.true?
       args_to_pass = explicit_args ? args : []
-      push r(:send, :super, :implicit, args_to_pass, blockiseq, self)
+      do_simple_send(:implicit, :super, args_to_pass, blockiseq)
 
       # push result
     end
@@ -121,7 +127,7 @@ module Reversal
     end
     
     def decompile_tostring(inst, line_no)
-      push r(:send, :to_s, pop, [], nil, self)
+      do_simple_send(pop, :to_s)
     end
     
     def decompile_concatstrings(inst, line_no)
@@ -243,13 +249,11 @@ module Reversal
     end
     def decompile_opt_length(inst, line_no)
       # [:opt_length]
-      receiver = pop
-      push r(:send, :length, receiver, [], nil, self)
+      do_simple_send(pop, :length)
     end
     def decompile_opt_succ(inst, line_no)
       # [:opt_succ]
-      receiver = pop
-      push r(:send, :succ, receiver, [], nil, self)
+      do_simple_send(pop, :succ)
     end
       
     ##############################
@@ -329,17 +333,18 @@ module Reversal
       level = throw_state >> 16
       case state
       when 0x01
-        push "return #{pop}"
+        do_simple_send :implicit, :return, [pop]
       when 0x02
-        push "break #{pop}"
+        do_simple_send :implicit, :break, [pop]
       when 0x03
+        do_simple_send :implicit, :next, [pop]
         push "next #{pop}"
       when 0x04
         pop #useless nil
-        push "retry"
+        do_simple_send :implicit, :retry
       when 0x05
         pop #useless nil
-        push "redo"
+        do_simple_send :implicit, :redo
       end
     end
     
