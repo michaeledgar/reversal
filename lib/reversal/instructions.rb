@@ -121,7 +121,7 @@ module Reversal
     end
     
     def decompile_tostring(inst, line_no)
-      push "(#{pop}).to_s"
+      push r(:send, :to_s, pop, [], nil, self)
     end
     
     def decompile_concatstrings(inst, line_no)
