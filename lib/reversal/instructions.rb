@@ -190,7 +190,6 @@ module Reversal
     end
       
       
-    ## TODO: Needs Internal Representation!
     ## TODO: IR
     def decompile_putiseq(inst, line_no)
       push inst[1]

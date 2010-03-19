@@ -88,8 +88,7 @@ module Reversal
     def pop(n = 1)
       if @stack.empty?
         raise "Popped an empty stack"
-      end
-      if n == 1
+      elsif n == 1
         @stack.pop
       else
         popn(n)
@@ -97,9 +96,7 @@ module Reversal
     end
     
     def popn(n = 1)
-      ret = []
-      1.upto(n) { ret.unshift pop }
-      ret
+      (1..n).to_a.map {pop}.reverse
     end
     
     def string_wrap(string, left, right)
