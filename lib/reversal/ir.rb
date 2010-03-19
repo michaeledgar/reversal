@@ -51,6 +51,10 @@ module Reversal
       "*#{self[1]}"
     end
 
+    def to_s_array
+      "[#{self[1].map {|x| x.to_s}.join(", ")}]"
+    end
+
     def to_s_range
       start, stop, flag = self[1..-1]
       if flag # inclusive?

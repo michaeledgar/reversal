@@ -45,8 +45,6 @@ module Reversal
       explicit_args = explicit_check.true?
       args_to_pass = explicit_args ? args : []
       do_simple_send(:implicit, :super, args_to_pass, blockiseq)
-
-      # push result
     end
     
     #############################
@@ -54,7 +52,6 @@ module Reversal
     #############################
     def decompile_getlocal(inst, line_no)
       push r(:getvar, get_local(inst[1]))
-      #push get_local(inst[1])
     end
     
     def decompile_getinstancevariable(inst, line_no)
@@ -144,8 +141,9 @@ module Reversal
     def decompile_newarray(inst, line_no)
       # [:newarray, num_to_pop]
       arr = popn(inst[1])
-      push("[#{arr.map {|a| a.to_s}.join(", ")}]")
+      push r(:array, arr)
     end
+    
     def decompile_splatarray(inst, line_no)
       # [:splatarray]
       push r(:splat, pop)
@@ -192,6 +190,8 @@ module Reversal
     end
       
       
+    ## TODO: Needs Internal Representation!
+    ## TODO: IR
     def decompile_putiseq(inst, line_no)
       push inst[1]
     end
@@ -271,6 +271,7 @@ module Reversal
     #######################
     ##### Control Flow ####
     #######################
+    ## TODO: IR
     def decompile_branchunless(inst, line_no)
       target = inst[1]
       forward = forward_jump?(line_no, target)
@@ -289,6 +290,7 @@ module Reversal
       end
     end
     
+    ## TODO: IR
     def decompile_branchif(inst, line_no)
       target = inst[1]
       forward = forward_jump?(line_no, target)
@@ -301,6 +303,7 @@ module Reversal
       end
     end
     
+    ## TODO: IR
     def decompile_jump(inst, line_no)
       target = inst[1]
       forward = forward_jump?(line_no, target)
@@ -336,7 +339,6 @@ module Reversal
         do_simple_send :implicit, :break, [pop]
       when 0x03
         do_simple_send :implicit, :next, [pop]
-        push "next #{pop}"
       when 0x04
         pop #useless nil
         do_simple_send :implicit, :retry
@@ -349,6 +351,7 @@ module Reversal
     #############################
     ###### Classes/Modules ######
     #############################
+    ## TODO: IR
     def decompile_defineclass(inst, line_no)
       name, new_iseq, type = inst[1..-1]
       superklass, base = pop, pop
