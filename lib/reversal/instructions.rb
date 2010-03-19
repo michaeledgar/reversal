@@ -244,12 +244,12 @@ module Reversal
     def decompile_opt_length(inst, line_no)
       # [:opt_length]
       receiver = pop
-      push "#{receiver}.length"
+      push r(:send, :length, receiver, [], nil, self)
     end
     def decompile_opt_succ(inst, line_no)
       # [:opt_succ]
       receiver = pop
-      push "#{receiver}.succ"
+      push r(:send, :succ, receiver, [], nil, self)
     end
       
     ##############################
