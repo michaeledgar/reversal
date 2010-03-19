@@ -50,13 +50,6 @@ module Reversal
     def indent_size
       TAB_SIZE
     end
-
-    ##
-    # Adds a line with the proper indentation
-    def add_line(line, indent = true)
-      @output << (" " * @indent) + line.to_s if indent
-      @output << line.to_s                   unless indent
-    end
     
     ##
     # Gets a local variable at the given bytecode-style index
@@ -99,7 +92,7 @@ module Reversal
       (1..n).to_a.map {pop}.reverse
     end
     
-    def string_wrap(string, left, right)
+    def string_wrap(string, left, right = left)
       "#{left}#{string}#{right}"
     end
     
@@ -107,10 +100,12 @@ module Reversal
     def decompile
       reset!
       # dispatch on the iseq type
-      self.__send__("decompile_#{@iseq.type}".to_sym, @iseq) do
+
+      result = self.__send__("decompile_#{@iseq.type}".to_sym, @iseq) do
         decompile_body @iseq
       end
       @output.join("\n")
+      result.map {|x| x.to_s}.join("\n")
     end
     
     def indented
@@ -118,31 +113,29 @@ module Reversal
       yield
       outdent!
     end
-    
-    def wrap_and_indent(top, bottom)
-      add_line top
-      indented do
-        yield
-      end
-      add_line bottom
+
+    def indent_array(arr)
+      arr.map {|x| (" " * indent) + x.to_s}
     end
     
     def decompile_block(iseq)
       args = iseq.argstring
-      args = string_wrap(args, "|", "|") if iseq.stats[:arg_size] > 0
-      add_line(" do #{args}", false)
+      args = string_wrap(args, "|") if iseq.stats[:arg_size] > 0
+      result = [" do #{args}"]
       indented do
-        yield iseq
+        result.concat indent_array(yield iseq)
       end
-      add_line "end"
+      result << "end"
     end
     
     def decompile_method(iseq)
       args = iseq.argstring
       args = string_wrap(args, "(", ")") if iseq.stats[:arg_size] > 0
-      wrap_and_indent("def #{iseq.name}#{args}", "end") do
-        yield iseq
+      result = ["def #{iseq.name}#{args}"]
+      indented do
+        result.concat((yield iseq).map {|x| (" "*@indent) + x.to_s})
       end
+      result << "end"
     end
     
     ##
@@ -169,6 +162,7 @@ module Reversal
     def forward_jump?(current, label)
       @iseq.labels[label] && @iseq.labels[label] > current
     end
+    
     def backward_jump?(current, label)
       !forward_jump?(current, label)
     end
@@ -197,7 +191,7 @@ module Reversal
         end
         instruction += 1
       end
-      @stack.each {|x| add_line x}
+      @stack
     end
     
   end
