@@ -39,19 +39,10 @@ module Reversal
       args = popn(argc)
       explicit_check = pop
       explicit_args = explicit_check.true?
-      
-      if explicit_args then result = "super(#{args.map {|a| a.to_s}.join(", ")})"
-      else result = "super"
-      end
-      
-      if blockiseq
-        # make a new reverser with a parent (for dynamic var lookups)
-        reverser = Reverser.new(blockiseq, self)
-        reverser.indent = @indent
-        result << reverser.decompile
-      end
-      
-      push result
+      args_to_pass = explicit_args ? args : []
+      push r(:send, :super, :implicit, args_to_pass, blockiseq, self)
+
+      # push result
     end
     
     #############################
