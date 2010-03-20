@@ -107,7 +107,7 @@ module Reversal
 
       reverser = Reverser.new(blockiseq, parent)
       reverser.indent = 0
-      reverser.to_ir
+      reverser.to_ir.map {|x| x.to_s}.join("\n")
     end
 
     def to_s_send

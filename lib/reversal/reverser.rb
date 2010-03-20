@@ -90,10 +90,9 @@ module Reversal
     def to_ir
       reset!
       # dispatch on the iseq type
-      result = self.__send__("decompile_#{@iseq.type}".to_sym, @iseq) do
+      self.__send__("decompile_#{@iseq.type}".to_sym, @iseq) do
         decompile_body @iseq
       end
-      
     end
     
     def indented
@@ -104,7 +103,13 @@ module Reversal
     end
 
     def indent_str(str)
-      (" " * @indent) + str.to_s
+      begin
+        (" " * @indent) + str.to_s
+      rescue TypeError
+        require 'pp'
+        pp str
+        raise
+        end
     end
 
     def indent_array(arr)

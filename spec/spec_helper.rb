@@ -18,7 +18,7 @@ class DecompilationTestCase
   end
   
   def assert_correct_ignoring_indentation
-    decompiled = @reverser.to_ir.map {|x| x.to_s.lstrip}.join("\n")
+    decompiled = @reverser.to_ir.join("\n").split("\n").map {|x| x.to_s.lstrip}.join("\n")
     result     = @result.split("\n").map {|x| x.lstrip}.join("\n")
     decompiled.should.equal result
   end
