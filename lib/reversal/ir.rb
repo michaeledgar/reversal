@@ -1,5 +1,12 @@
 module Reversal
   class Sexp < Array
+    def initialize(*args)
+      super
+      if self.respond_to?("post_init_#{self.type}".to_sym)
+        send("post_init_#{self.type}".to_sym)
+      end
+    end
+
     def type
       self.first
     end
@@ -110,6 +117,15 @@ module Reversal
       reverser.to_ir.map {|x| x.to_s}.join("\n")
     end
 
+    def post_init_send
+      blockiseq, parent = self[4], self[5]
+      if blockiseq
+        reverser = Reverser.new(blockiseq, parent)
+        reverser.indent = parent.indent
+        self[4] = reverser.to_ir
+      end
+    end
+
     def to_s_send
       meth, receiver, args, blockiseq, parent = self.body
       result = meth.to_s
@@ -118,9 +134,7 @@ module Reversal
 
       if blockiseq
         # make a new reverser with a parent (for dynamic var lookups)
-        reverser = Reverser.new(blockiseq, parent)
-        reverser.indent = parent.indent
-        result << reverser.to_ir.map {|x| x.to_s}.join("\n")
+        result << blockiseq.map {|x| x.to_s}.join("\n")
       end
       result
     end
