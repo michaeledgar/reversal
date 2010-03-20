@@ -103,18 +103,21 @@ module Reversal
       "#{self[1]}[#{self[2]}] = #{self[3]}"
     end
 
-    def to_s_defmethod
+    def post_init_defmethod
       receiver, name, blockiseq, parent = self.body
-      result = ""
       name = name.to_s
       # alter name if necessary
       name = name[1..-1] if name[0,1] == ":" # cut off leading :
       name = (receiver.kind_of?(Integer) || receiver.fixnum?) ? "#{name}" : "#{receiver}.#{name}"
       blockiseq[5] = name
-
       reverser = Reverser.new(blockiseq, parent)
       reverser.indent = 0
-      reverser.to_ir.map {|x| x.to_s}.join("\n")
+      self[3] = reverser.to_ir
+    end
+
+    def to_s_defmethod
+      blockiseq = self[3]
+      blockiseq.map {|x| x.to_s}.join("\n")
     end
 
     def post_init_send
