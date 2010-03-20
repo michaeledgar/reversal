@@ -107,7 +107,7 @@ module Reversal
 
       reverser = Reverser.new(blockiseq, parent)
       reverser.indent = 0
-      result << reverser.decompile
+      reverser.to_ir
     end
 
     def to_s_send
@@ -120,7 +120,7 @@ module Reversal
         # make a new reverser with a parent (for dynamic var lookups)
         reverser = Reverser.new(blockiseq, parent)
         reverser.indent = parent.indent
-        result << reverser.decompile
+        result << reverser.to_ir.map {|x| x.to_s}.join("\n")
       end
       result
     end

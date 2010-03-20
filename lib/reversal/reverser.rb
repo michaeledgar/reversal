@@ -44,10 +44,6 @@ module Reversal
     def outdent!
       @indent = [0, @indent - TAB_SIZE].max
     end
-
-    def indent_size
-      TAB_SIZE
-    end
     
     ##
     # Gets a local variable at the given bytecode-style index
@@ -90,25 +86,21 @@ module Reversal
       (1..n).to_a.map {pop}.reverse
     end
     
-    def string_wrap(string, left, right = left)
-      "#{left}#{string}#{right}"
-    end
-    
     # include specific modules for different reversal techniques
-    def decompile
+    def to_ir
       reset!
       # dispatch on the iseq type
-
       result = self.__send__("decompile_#{@iseq.type}".to_sym, @iseq) do
         decompile_body @iseq
       end
-      result.map {|x| x.to_s}.join("\n")
+      
     end
     
     def indented
       indent!
-      yield
+      result = yield
       outdent!
+      result
     end
 
     def indent_str(str)
@@ -144,14 +136,16 @@ module Reversal
     # If it's just top-level code, then there are no args - just decompile
     # the body straight away
     def decompile_top(iseq)
-      yield iseq
+      indent_array(yield iseq)
     end
     
     ##
     # If it's just top-level code, then there are no args - just decompile
     # the body straight away
     def decompile_class(iseq)
-      yield iseq
+      indented do
+        indent_array(yield iseq)
+      end
     end
     
     def remove_useless_dup

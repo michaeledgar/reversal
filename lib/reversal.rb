@@ -21,7 +21,7 @@ module Reversal
   class << self
     def decompile(meth_or_proc)
       iseq = RubyVM::InstructionSequence.from_method(meth_or_proc)
-      Reverser.for(iseq).decompile
+      Reverser.for(iseq).to_ir
     end
   end
 end

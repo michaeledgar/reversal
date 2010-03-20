@@ -14,11 +14,11 @@ class DecompilationTestCase
   end
   
   def assert_correct
-    @reverser.decompile.should.equal @result
+    @reverser.to_ir.map {|x| x.to_s}.join("\n").should.equal @result
   end
   
   def assert_correct_ignoring_indentation
-    decompiled = @reverser.decompile.split("\n").map {|x| x.lstrip}.join("\n")
+    decompiled = @reverser.to_ir.map {|x| x.to_s.lstrip}.join("\n")
     result     = @result.split("\n").map {|x| x.lstrip}.join("\n")
     decompiled.should.equal result
   end
