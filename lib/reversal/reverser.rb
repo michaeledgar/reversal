@@ -25,15 +25,13 @@ module Reversal
       @iseq.validate!
       
       @parent = parent
-      @locals = (@iseq.locals + [:self]).reverse
+      @locals = [:self] + @iseq.locals.reverse
       reset!
     end
     
     def reset!
-      @output = []
       @indent ||= 0
       
-      @current_line = 0
       @stack = []
       @else_stack = []
       @end_stack  = []
@@ -104,7 +102,6 @@ module Reversal
       result = self.__send__("decompile_#{@iseq.type}".to_sym, @iseq) do
         decompile_body @iseq
       end
-      @output.join("\n")
       result.map {|x| x.to_s}.join("\n")
     end
     
@@ -114,28 +111,32 @@ module Reversal
       outdent!
     end
 
+    def indent(str)
+      (" " * @indent) + str.to_s
+    end
+
     def indent_array(arr)
-      arr.map {|x| (" " * indent) + x.to_s}
+      arr.map {|x| indent x}
     end
     
     def decompile_block(iseq)
       args = iseq.argstring
-      args = string_wrap(args, "|") if iseq.stats[:arg_size] > 0
+      args = "|#{args}|" if iseq.stats[:arg_size] > 0
       result = [" do #{args}"]
       indented do
         result.concat indent_array(yield iseq)
       end
-      result << "end"
+      result << indent("end")
     end
     
     def decompile_method(iseq)
       args = iseq.argstring
-      args = string_wrap(args, "(", ")") if iseq.stats[:arg_size] > 0
+      args = "(#{args})" if iseq.stats[:arg_size] > 0
       result = ["def #{iseq.name}#{args}"]
       indented do
-        result.concat((yield iseq).map {|x| (" "*@indent) + x.to_s})
+        result.concat indent_array(yield iseq)
       end
-      result << "end"
+      result << indent("end")
     end
     
     ##
