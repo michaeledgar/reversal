@@ -119,7 +119,7 @@ module Reversal
       if blockiseq
         # make a new reverser with a parent (for dynamic var lookups)
         reverser = Reverser.new(blockiseq, parent)
-        reverser.indent = parent.indent_size
+        reverser.indent = parent.indent
         result << reverser.decompile
       end
       result

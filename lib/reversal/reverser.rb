@@ -111,12 +111,12 @@ module Reversal
       outdent!
     end
 
-    def indent(str)
+    def indent_str(str)
       (" " * @indent) + str.to_s
     end
 
     def indent_array(arr)
-      arr.map {|x| indent x}
+      arr.map {|x| indent_str x}
     end
     
     def decompile_block(iseq)
@@ -126,17 +126,18 @@ module Reversal
       indented do
         result.concat indent_array(yield iseq)
       end
-      result << indent("end")
+      result << indent_str("end")
     end
     
     def decompile_method(iseq)
       args = iseq.argstring
       args = "(#{args})" if iseq.stats[:arg_size] > 0
-      result = ["def #{iseq.name}#{args}"]
+      result = []
+      result << indent_str("def #{iseq.name}#{args}")
       indented do
         result.concat indent_array(yield iseq)
       end
-      result << indent("end")
+      result << indent_str("end")
     end
     
     ##
@@ -173,6 +174,7 @@ module Reversal
       # loop back
       while instruction < stop do
         inst = iseq.body[instruction]
+        #p inst, @stack
         #puts "Instruction #{instruction} #{inst.inspect} #{@stack.inspect}"
         case inst
         when Integer
