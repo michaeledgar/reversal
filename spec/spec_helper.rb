@@ -14,6 +14,7 @@ class DecompilationTestCase
   end
   
   def assert_correct
+    assert_correct_ignoring_indentation
     @reverser.to_ir.map {|x| x.to_s}.join("\n").should.equal @result
   end
   
