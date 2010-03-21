@@ -141,6 +141,32 @@ module Reversal
       end
       result
     end
+
+    ## classes and modules
+    def to_s_defclass
+      name, base_as_str, superklass_as_str, ir = self.body
+      result = "class #{base_as_str}#{name}#{superklass_as_str}"
+      definition = ir.map {|x| x.to_s.split("\n").map {|x| "  " + x}.join("\n")}.join("\n")
+      result << "\n#{definition.to_s}\n"
+      result << "end"
+      result
+    end
+    def to_s_defmetaclass
+      base, ir = self.body
+      result = "class << #{base}"
+      definition = ir.map {|x| x.to_s.split("\n").map {|x| "  " + x}.join("\n")}.join("\n")
+      result << "\n#{definition.to_s}\n"
+      result << "end"
+      result
+    end
+    def to_s_defmodule
+      name, base, ir = self.body
+      result = "module #{base}#{name}"
+      definition = ir.map {|x| x.to_s.split("\n").map {|x| "  " + x}.join("\n")}.join("\n")
+      result << "\n#{definition.to_s}\n"
+      result << "end"
+      result
+    end
   end
 end
 

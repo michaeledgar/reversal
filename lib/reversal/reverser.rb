@@ -148,9 +148,7 @@ module Reversal
     # If it's just top-level code, then there are no args - just decompile
     # the body straight away
     def decompile_class(iseq)
-      indented do
         indent_array(yield iseq)
-      end
     end
     
     def remove_useless_dup

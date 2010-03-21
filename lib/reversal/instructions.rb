@@ -358,17 +358,13 @@ module Reversal
       base_as_str = (base.kind_of?(Fixnum) || base.fixnum? ? "" : "#{base}::")
       new_reverser = Reverser.new(new_iseq, self)
       case type
-      when 0 # class
-        push "class #{base_as_str}#{name}#{superklass_as_str}"
+       when 0 # class
+        push r(:defclass, name, base_as_str, superklass_as_str, new_reverser.to_ir)
       when 1
-        push "class << #{base}"
+        push r(:defmetaclass, base, new_reverser.to_ir)
       when 2
-        push "module #{base_as_str}#{name}"
+        push r(:defmodule, name, base_as_str, new_reverser.to_ir)
       end
-      #new_reverser.indent = Reverser::TAB_SIZE
-      new_reverser.to_ir.each {|x| push(x)}
-      #new_reverser.decompile.split("\n").each {|x| push((" " * Reverser::TAB_SIZE)+x)}
-      push "end"
     end
     
     ###############################
