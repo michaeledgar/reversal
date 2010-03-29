@@ -58,4 +58,24 @@ describe "Intermediate Representation Strinfication" do
     r(:infix, :+, [r(:lit, 3), r(:setvar, "avar", 10)]).to_s.should.equal("(3 + (avar = 10))")
   end
 
+  it "converts a hash literal" do
+    ir = r(:hash, [[r(:lit, :key), r(:lit, :value)], [r(:lit, "hello"), r(:lit, "world")]])
+    ir.to_s.should.equal "{:key => :value, \"hello\" => \"world\"}"
+  end
+
+  it "converts nil literals" do
+    r(:nil).to_s.should.equal "nil"
+  end
+
+  it "converts not expressions" do
+    r(:not, r(:lit, "something")).to_s.should.equal "!\"something\""
+  end
+
+  it "converts array reference expressions" do
+    r(:aref, r(:getvar, :ahash), r(:lit, :akey)).to_s.should.equal "ahash[:akey]"
+  end
+
+  it "converts array setting expressions" do
+    r(:aset, r(:getvar, :ahash), r(:lit, :akey), r(:lit, 5)).to_s.should.equal "ahash[:akey] = 5"
+  end
 end
