@@ -112,12 +112,12 @@ module Reversal
       blockiseq[5] = name
       reverser = Reverser.new(blockiseq, parent)
       reverser.indent = 0
-      self[3] = reverser.to_ir
+      self[3] = IRList.new(reverser.to_ir)
     end
 
     def to_s_defmethod
       code_ir = self[3]
-      code_ir.map {|x| x.to_s}.join("\n")
+      code_ir.to_s
     end
 
     def post_init_send
@@ -125,7 +125,7 @@ module Reversal
       if blockiseq
         reverser = Reverser.new(blockiseq, parent)
         reverser.indent = parent.indent
-        self[4] = reverser.to_ir
+        self[4] = IRList.new(reverser.to_ir)
       end
     end
 
@@ -137,7 +137,7 @@ module Reversal
 
       if blockiseq
         # make a new reverser with a parent (for dynamic var lookups)
-        result << blockiseq.map {|x| x.to_s}.join("\n")
+        result << blockiseq.to_s
       end
       result
     end

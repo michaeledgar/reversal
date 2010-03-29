@@ -11,9 +11,11 @@ module Reversal
   autoload :Instructions, "reversal/instructions"
 end
 
+require 'reversal/ir_list'
 require 'reversal/ir'
 require 'reversal/iseq'
 require 'reversal/reverser'
+
 
 module Reversal
   VERSION = "0.1.0"
