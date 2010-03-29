@@ -90,9 +90,7 @@ module Reversal
     def to_ir
       reset!
       # dispatch on the iseq type
-      self.__send__("decompile_#{@iseq.type}".to_sym, @iseq) do
-        IRList.new(decompile_body(@iseq))
-      end
+      self.__send__("decompile_#{@iseq.type}".to_sym, @iseq)
     end
     
     def indented
@@ -121,7 +119,7 @@ module Reversal
       args = "|#{args}|" if iseq.stats[:arg_size] > 0
       result = [" do #{args}"]
       indented do
-        result.concat indent_array(yield iseq)
+        result.concat indent_array(IRList.new(decompile_body(@iseq)))
       end
       result << indent_str("end")
     end
@@ -132,7 +130,7 @@ module Reversal
       result = []
       result << indent_str("def #{iseq.name}#{args}")
       indented do
-        result.concat indent_array(yield iseq)
+        result.concat indent_array(IRList.new(decompile_body(@iseq)))
       end
       result << indent_str("end")
     end
@@ -141,14 +139,14 @@ module Reversal
     # If it's just top-level code, then there are no args - just decompile
     # the body straight away
     def decompile_top(iseq)
-      indent_array(yield iseq)
+      IRList.new(decompile_body(@iseq))
     end
     
     ##
     # If it's just top-level code, then there are no args - just decompile
     # the body straight away
     def decompile_class(iseq)
-      indent_array(yield iseq)
+      indent_array(IRList.new(decompile_body(@iseq)))
     end
     
     def remove_useless_dup
