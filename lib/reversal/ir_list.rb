@@ -2,8 +2,8 @@ require 'delegate'
 module Reversal
   class IRList < DelegateClass(Array)
     def initialize(list)
-      super(list)
-      @source = list
+      @source = list.flatten
+      super(@source)
     end
 
     def indent(amt = 2)
