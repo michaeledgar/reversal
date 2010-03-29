@@ -91,7 +91,7 @@ module Reversal
       reset!
       # dispatch on the iseq type
       self.__send__("decompile_#{@iseq.type}".to_sym, @iseq) do
-        decompile_body @iseq
+        IRList.new(decompile_body(@iseq))
       end
     end
     
@@ -148,7 +148,7 @@ module Reversal
     # If it's just top-level code, then there are no args - just decompile
     # the body straight away
     def decompile_class(iseq)
-        indent_array(yield iseq)
+      indent_array(yield iseq)
     end
     
     def remove_useless_dup
@@ -176,7 +176,7 @@ module Reversal
         case inst
         when Integer
           # x
-          @current_line = inst
+          @current_line = inst    # unused
         when Symbol
           # :label_y
           while inst == @end_stack.last do
