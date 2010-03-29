@@ -54,4 +54,8 @@ describe "Intermediate Representation Strinfication" do
     r(:infix, :*, [r(:lit, "hi"), r(:lit, 3), r(:lit, 20)]).to_s.should.equal "\"hi\" * 3 * 20"
   end
 
+  it "converts a complex infix expression, introducing parentheses" do
+    r(:infix, :+, [r(:lit, 3), r(:setvar, "avar", 10)]).to_s.should.equal("(3 + (avar = 10))")
+  end
+
 end

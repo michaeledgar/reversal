@@ -15,7 +15,7 @@ module Reversal
     end
 
     def simple?
-      ![:infix, :if, :else, :send, :setvar, :aset].include?(self.type)
+      ![:infix, :if, :else, :setvar, :aset].include?(self.type)
     end
 
     def nil?
@@ -77,7 +77,10 @@ module Reversal
       if need_parens
         args.map {|a| a.to_s}.join(" #{operator} ")
       else
-        "(" + args.map {|a| a.to_s}.join(" #{operator} ") + ")"
+        args = args.map do |arg|
+          arg.simple? ? arg.to_s : "(#{arg.to_s})"
+        end
+        "(" + args.join(" #{operator} ") + ")"
       end
     end
 

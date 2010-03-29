@@ -21,7 +21,7 @@ EOF
 
     @interpolates_a_string_case = DecompilationTestCase.new(A, :interpolates_a_string, <<-EOF)
 def interpolates_a_string
-  ("hello " + world_method.to_s)
+  "hello " + world_method.to_s
 end
 EOF
 
