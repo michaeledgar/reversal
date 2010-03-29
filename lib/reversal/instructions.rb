@@ -359,11 +359,11 @@ module Reversal
       new_reverser = Reverser.new(new_iseq, self)
       case type
        when 0 # class
-        push r(:defclass, name, base_as_str, superklass_as_str, new_reverser.to_ir)
+        push r(:defclass, name, base_as_str, superklass_as_str, new_reverser.decompile_body(new_iseq))
       when 1
-        push r(:defmetaclass, base, new_reverser.to_ir)
+        push r(:defmetaclass, base, new_reverser.decompile_body(new_iseq))
       when 2
-        push r(:defmodule, name, base_as_str, new_reverser.to_ir)
+        push r(:defmodule, name, base_as_str, new_reverser.decompile_body(new_iseq))
       end
     end
     

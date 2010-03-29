@@ -106,6 +106,16 @@ module Reversal
       "#{self[1]}[#{self[2]}] = #{self[3]}"
     end
 
+    def to_s_block
+      args, body = self.body
+      args = args.argstring
+      args = "|#{args}|" if iseq.stats[:arg_size] > 0
+      result = [" do #{args}"]
+      result.concat IRList.new(decompile_body(@iseq)).indent
+      result << "end"
+      result.join("\n")
+    end
+
     def post_init_defmethod
       receiver, name, blockiseq, parent = self.body
       name = name.to_s
@@ -115,12 +125,18 @@ module Reversal
       blockiseq[5] = name
       reverser = Reverser.new(blockiseq, parent)
       reverser.indent = 0
-      self[3] = IRList.new(reverser.to_ir)
+      self[5] = IRList.new(reverser.decompile_body(blockiseq))
     end
 
     def to_s_defmethod
-      code_ir = self[3]
-      code_ir.to_s
+      receiver, name, iseq, parent, code = self.body
+      args = iseq.argstring
+      args = "(#{args})" if iseq.stats[:arg_size] > 0
+      result = []
+      result << "def #{iseq.name}#{args}"
+      result << code.indent.to_s
+      result << "end"
+      result.join("\n")
     end
 
     def post_init_send
@@ -154,6 +170,7 @@ module Reversal
       result << "end"
       result
     end
+    
     def to_s_defmetaclass
       base, ir = self.body
       result = "class << #{base}"
@@ -162,6 +179,7 @@ module Reversal
       result << "end"
       result
     end
+
     def to_s_defmodule
       name, base, ir = self.body
       result = "module #{base}#{name}"

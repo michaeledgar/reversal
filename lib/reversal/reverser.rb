@@ -115,24 +115,11 @@ module Reversal
     end
     
     def decompile_block(iseq)
-      args = iseq.argstring
-      args = "|#{args}|" if iseq.stats[:arg_size] > 0
-      result = [" do #{args}"]
-      indented do
-        result.concat indent_array(IRList.new(decompile_body(@iseq)))
-      end
-      result << indent_str("end")
+      return r(:block, iseq.args, IRList.new(decompile_body(@iseq)))
     end
     
     def decompile_method(iseq)
-      args = iseq.argstring
-      args = "(#{args})" if iseq.stats[:arg_size] > 0
-      result = []
-      result << indent_str("def #{iseq.name}#{args}")
-      indented do
-        result.concat indent_array(IRList.new(decompile_body(@iseq)))
-      end
-      result << indent_str("end")
+      return r(:defmethod, r(:lit, 0), iseq.name, iseq, self)
     end
     
     ##

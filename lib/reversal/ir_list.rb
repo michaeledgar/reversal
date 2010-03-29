@@ -10,6 +10,7 @@ module Reversal
       @source.map! do |item|
         item.to_s.split("\n").map {|x| " " * amt + x.to_s}.join("\n")
       end
+      self
     end
 
     def to_s
