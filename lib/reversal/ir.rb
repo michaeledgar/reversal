@@ -116,8 +116,8 @@ module Reversal
     end
 
     def to_s_defmethod
-      blockiseq = self[3]
-      blockiseq.map {|x| x.to_s}.join("\n")
+      code_ir = self[3]
+      code_ir.map {|x| x.to_s}.join("\n")
     end
 
     def post_init_send
