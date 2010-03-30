@@ -115,7 +115,7 @@ module Reversal
     end
     
     def decompile_block(iseq)
-      return r(:block, iseq.args, IRList.new(decompile_body))
+      return r(:block, @iseq, IRList.new(decompile_body))
     end
     
     def decompile_method(iseq)

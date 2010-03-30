@@ -106,12 +106,16 @@ module Reversal
       "#{self[1]}[#{self[2]}] = #{self[3]}"
     end
 
+    def post_init_block
+      
+    end
+
     def to_s_block
-      args, body = self.body
-      args = args.argstring
-      args = "|#{args}|" if iseq.stats[:arg_size] > 0
+      whole_iseq, body = self.body
+      args = whole_iseq.argstring
+      args = "|#{args}|" if whole_iseq.stats[:arg_size] > 0
       result = [" do #{args}"]
-      result.concat IRList.new(decompile_body).indent
+      result.concat body.indent
       result << "end"
       result.join("\n")
     end
@@ -145,7 +149,7 @@ module Reversal
       if blockiseq
         reverser = Reverser.new(blockiseq, parent)
         reverser.indent = parent.indent
-        self[4] = IRList.new(reverser.to_ir)
+        self[4] = IRList.new([reverser.to_ir])
       end
     end
 
