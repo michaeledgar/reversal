@@ -32,7 +32,7 @@ module Reversal
         # args will be [iseq, name, receiver, scope_arg]
         receiver, name, blockiseq = args
         reverser = Reverser.new(blockiseq, self)
-        push r(:defmethod, receiver, name, IRList.new(reverser.decompile_body), blockiseq)
+        push r(:defmethod, receiver, name, IRList.new(reverser.decompile_body), ISeq.new(blockiseq).argstring)
       # normal method call
       else
         remove_useless_dup if meth == :[]=

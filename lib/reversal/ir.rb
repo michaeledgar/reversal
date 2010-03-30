@@ -127,10 +127,9 @@ module Reversal
     end
 
     def to_s_defmethod
-      receiver, name, code, iseq = self.body
-      iseq = ISeq.new(iseq)
-      args = iseq.argstring
-      args = "(#{args})" if iseq.stats[:arg_size] > 0
+      receiver, name, code, argstring = self.body
+      args = argstring
+      args = "(#{args})" if args != ""
       result = []
       result << "def #{name}#{args}"
       result << code.indent.to_s
