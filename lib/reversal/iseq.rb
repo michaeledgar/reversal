@@ -46,6 +46,41 @@ module Reversal
     def version
       "#{major_version}.#{minor_version}.#{patch_version}"
     end
+
+    def complex_args?
+      self.args.kind_of? Array
+    end
+
+    def improve_args(newargs)
+      return newargs unless complex_args?
+      # format of args array is [required_argc, arg_opt_labels, post_len, post_start, arg_rest, arg_block, arg_simple]
+      required_argc, arg_opt_labels, post_len, post_start, arg_rest, arg_block, arg_simple = self.args
+      if arg_block > -1
+        newargs[arg_block] = "&#{newargs[arg_block]}"
+      end
+      if arg_rest > -1
+        newargs[arg_rest] = "*#{self.locals[arg_rest]}"
+      end
+      newargs
+    end
+
+    def labels
+      return @labels if @labels
+      result = {}
+      self.body.each_with_index do |inst, idx|
+        if inst.is_a?(Symbol) && inst.to_s[0..6] = "label_"
+          result[inst] = idx
+        end
+      end
+      @labels = result
+    end
+
+    def argstring
+      return "" if num_args == 0
+      args_to_use = self.locals[0...self.num_args]
+      args_to_use = improve_args(args_to_use)
+      return args_to_use.map {|x| x.to_s}.join(", ")
+    end
   end
   
   class VersionOneIseq < SubclassableIseq
@@ -69,41 +104,6 @@ module Reversal
     
     def num_args
       self.stats[:arg_size]
-    end
-    
-    def complex_args?
-      self.args.kind_of? Array
-    end
-    
-    def improve_args(newargs)
-      return newargs unless complex_args?
-      # format of args array is [required_argc, arg_opt_labels, post_len, post_start, arg_rest, arg_block, arg_simple]
-      required_argc, arg_opt_labels, post_len, post_start, arg_rest, arg_block, arg_simple = self.args
-      if arg_block > -1
-        newargs[arg_block] = "&#{newargs[arg_block]}"
-      end
-      if arg_rest > -1
-        newargs[arg_rest] = "*#{self.locals[arg_rest]}"
-      end
-      newargs
-    end
-    
-    def labels
-      return @labels if @labels
-      result = {}
-      self.body.each_with_index do |inst, idx|
-        if inst.is_a?(Symbol) && inst.to_s[0..6] = "label_"
-          result[inst] = idx
-        end
-      end 
-      @labels = result
-    end
-    
-    def argstring
-      return "" if num_args == 0
-      args_to_use = self.locals[0...self.num_args]
-      args_to_use = improve_args(args_to_use)
-      return args_to_use.map {|x| x.to_s}.join(", ")
     end
   end
 end

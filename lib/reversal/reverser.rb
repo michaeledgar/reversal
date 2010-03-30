@@ -34,7 +34,36 @@ module Reversal
       @else_stack = []
       @end_stack  = []
     end
-    
+
+        # include specific modules for different reversal techniques
+    def to_ir
+      reset!
+      # dispatch on the iseq type
+      self.__send__("to_ir_#{@iseq.type}".to_sym, @iseq)
+    end
+
+    def to_ir_block(iseq)
+      return r(:block, @iseq, IRList.new(decompile_body))
+    end
+
+    def to_ir_method(iseq)
+      return r(:defmethod, r(:lit, 0), iseq.name, iseq, self)
+    end
+
+    ##
+    # If it's just top-level code, then there are no args - just decompile
+    # the body straight away
+    def to_ir_top(iseq)
+      IRList.new(decompile_body)
+    end
+
+    ##
+    # If it's just top-level code, then there are no args - just decompile
+    # the body straight away
+    def to_ir_class(iseq)
+      IRList.new(decompile_body)
+    end
+
     ##
     # Gets a local variable at the given bytecode-style index
     def get_local(idx)
@@ -74,35 +103,6 @@ module Reversal
     
     def popn(n = 1)
       (1..n).to_a.map {pop}.reverse
-    end
-    
-    # include specific modules for different reversal techniques
-    def to_ir
-      reset!
-      # dispatch on the iseq type
-      self.__send__("to_ir_#{@iseq.type}".to_sym, @iseq)
-    end
-    
-    def to_ir_block(iseq)
-      return r(:block, @iseq, IRList.new(decompile_body))
-    end
-    
-    def to_ir_method(iseq)
-      return r(:defmethod, r(:lit, 0), iseq.name, iseq, self)
-    end
-    
-    ##
-    # If it's just top-level code, then there are no args - just decompile
-    # the body straight away
-    def to_ir_top(iseq)
-      IRList.new(decompile_body)
-    end
-    
-    ##
-    # If it's just top-level code, then there are no args - just decompile
-    # the body straight away
-    def to_ir_class(iseq)
-      IRList.new(decompile_body)
     end
     
     def remove_useless_dup
