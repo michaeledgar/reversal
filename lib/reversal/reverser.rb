@@ -80,28 +80,28 @@ module Reversal
     def to_ir
       reset!
       # dispatch on the iseq type
-      self.__send__("decompile_#{@iseq.type}".to_sym, @iseq)
+      self.__send__("to_ir_#{@iseq.type}".to_sym, @iseq)
     end
     
-    def decompile_block(iseq)
+    def to_ir_block(iseq)
       return r(:block, @iseq, IRList.new(decompile_body))
     end
     
-    def decompile_method(iseq)
+    def to_ir_method(iseq)
       return r(:defmethod, r(:lit, 0), iseq.name, iseq, self)
     end
     
     ##
     # If it's just top-level code, then there are no args - just decompile
     # the body straight away
-    def decompile_top(iseq)
+    def to_ir_top(iseq)
       IRList.new(decompile_body)
     end
     
     ##
     # If it's just top-level code, then there are no args - just decompile
     # the body straight away
-    def decompile_class(iseq)
+    def to_ir_class(iseq)
       IRList.new(decompile_body)
     end
     
