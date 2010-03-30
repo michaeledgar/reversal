@@ -358,13 +358,14 @@ module Reversal
       superklass_as_str = (superklass.nil? ? "" : " < #{superklass}")
       base_as_str = (base.kind_of?(Fixnum) || base.fixnum? ? "" : "#{base}::")
       new_reverser = Reverser.new(new_iseq, self)
+      ir = new_reverser.decompile_body
       case type
-       when 0 # class
-        push r(:defclass, name, base_as_str, superklass_as_str, new_reverser.decompile_body)
+      when 0 # class
+        push r(:general_module, :class, name, ir, [base_as_str, superklass_as_str])
       when 1
-        push r(:defmetaclass, base, new_reverser.decompile_body)
+        push r(:general_module, :metaclass, name, ir, [base])
       when 2
-        push r(:defmodule, name, base_as_str, new_reverser.decompile_body)
+        push r(:general_module, :module, name, ir, [base_as_str])
       end
     end
     

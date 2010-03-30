@@ -106,16 +106,13 @@ module Reversal
       "#{self[1]}[#{self[2]}] = #{self[3]}"
     end
 
-    def post_init_block
-      
-    end
-
     def to_s_block
       whole_iseq, body = self.body
       args = whole_iseq.argstring
       args = "|#{args}|" if whole_iseq.stats[:arg_size] > 0
-      result = [" do #{args}"]
-      result.concat body.indent
+      result = []
+      result << " do #{args}"
+      result << body.indent.to_s
       result << "end"
       result.join("\n")
     end
@@ -126,9 +123,8 @@ module Reversal
       # alter name if necessary
       name = name[1..-1] if name[0,1] == ":" # cut off leading :
       name = (receiver.kind_of?(Integer) || receiver.fixnum?) ? "#{name}" : "#{receiver}.#{name}"
-      blockiseq[5] = name
+      self[2] = name
       reverser = Reverser.new(blockiseq, parent)
-      reverser.indent = 0
       self[5] = IRList.new(reverser.decompile_body)
     end
 
@@ -138,7 +134,7 @@ module Reversal
       args = iseq.argstring
       args = "(#{args})" if iseq.stats[:arg_size] > 0
       result = []
-      result << "def #{iseq.name}#{args}"
+      result << "def #{name}#{args}"
       result << code.indent.to_s
       result << "end"
       result.join("\n")
@@ -148,7 +144,6 @@ module Reversal
       blockiseq, parent = self[4], self[5]
       if blockiseq
         reverser = Reverser.new(blockiseq, parent)
-        reverser.indent = parent.indent
         self[4] = IRList.new([reverser.to_ir])
       end
     end
@@ -160,38 +155,27 @@ module Reversal
       result << (args.any? ? "(#{args.map {|a| a.to_s}.join(", ")})" : "")
 
       if blockiseq
-        # make a new reverser with a parent (for dynamic var lookups)
         result << blockiseq.to_s
       end
       result
     end
 
-    ## classes and modules
-    def to_s_defclass
-      name, base_as_str, superklass_as_str, ir = self.body
-      result = "class #{base_as_str}#{name}#{superklass_as_str}"
-      definition = ir.map {|x| x.to_s.split("\n").map {|x| "  " + x}.join("\n")}.join("\n")
-      result << "\n#{definition.to_s}\n"
+    def to_s_general_module
+      type, name, ir, data = self.body
+      case type
+      when :module
+        first_line = "module #{data[0]}#{name}"
+      when :metaclass
+        first_line = "class << #{data[0]}"
+      when :class
+        first_line = "class #{data[0]}#{name}#{data[1]}"
+      end
+      definition = ir.map {|x| x.to_s.split("\n").map {|x| "  " + x}.join("\n")}.join("\n")     
+      result = []
+      result << first_line
+      result << definition.to_s
       result << "end"
-      result
-    end
-    
-    def to_s_defmetaclass
-      base, ir = self.body
-      result = "class << #{base}"
-      definition = ir.map {|x| x.to_s.split("\n").map {|x| "  " + x}.join("\n")}.join("\n")
-      result << "\n#{definition.to_s}\n"
-      result << "end"
-      result
-    end
-
-    def to_s_defmodule
-      name, base, ir = self.body
-      result = "module #{base}#{name}"
-      definition = ir.map {|x| x.to_s.split("\n").map {|x| "  " + x}.join("\n")}.join("\n")
-      result << "\n#{definition.to_s}\n"
-      result << "end"
-      result
+      result.join("\n")
     end
   end
 end
