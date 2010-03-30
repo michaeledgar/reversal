@@ -30,19 +30,9 @@ module Reversal
     end
     
     def reset!
-      @indent ||= 0
-      
       @stack = []
       @else_stack = []
       @end_stack  = []
-    end
-    
-    def indent!
-      @indent += TAB_SIZE
-    end
-    
-    def outdent!
-      @indent = [0, @indent - TAB_SIZE].max
     end
     
     ##
@@ -93,27 +83,6 @@ module Reversal
       self.__send__("decompile_#{@iseq.type}".to_sym, @iseq)
     end
     
-    def indented
-      indent!
-      result = yield
-      outdent!
-      result
-    end
-
-    def indent_str(str)
-      begin
-        (" " * @indent) + str.to_s
-      rescue TypeError
-        require 'pp'
-        pp str
-        raise
-        end
-    end
-
-    def indent_array(arr)
-      arr.map {|x| indent_str x}
-    end
-    
     def decompile_block(iseq)
       return r(:block, @iseq, IRList.new(decompile_body))
     end
@@ -133,7 +102,7 @@ module Reversal
     # If it's just top-level code, then there are no args - just decompile
     # the body straight away
     def decompile_class(iseq)
-      indent_array(IRList.new(decompile_body))
+      IRList.new(decompile_body)
     end
     
     def remove_useless_dup
@@ -167,7 +136,6 @@ module Reversal
           # :label_y
           while inst == @end_stack.last do
             @end_stack.pop
-            outdent!
             push "end"
           end
         when Array

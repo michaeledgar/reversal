@@ -284,7 +284,6 @@ module Reversal
         else
           push "if (#{predicate})"
         end
-        indent!
         @else_stack.push target
       end
     end
@@ -297,7 +296,6 @@ module Reversal
         # no elsif check
         predicate = pop
         push "unless (#{predicate})"
-        indent!
         @else_stack.push target
       end
     end
@@ -311,9 +309,7 @@ module Reversal
         if @iseq.body[line_no + 1] == @else_stack.last
           # we're an else!
           @end_stack.push target # that's when the else ends
-          outdent!
           push "else"
-          indent!
           @else_stack.pop
         end
       end
