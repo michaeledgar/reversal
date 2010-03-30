@@ -43,7 +43,7 @@ module Reversal
     end
 
     def to_ir_block(iseq)
-      return r(:block, @iseq, IRList.new(decompile_body))
+      return r(:block, @iseq.argstring, IRList.new(decompile_body))
     end
 
     def to_ir_method(iseq)

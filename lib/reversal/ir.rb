@@ -107,9 +107,8 @@ module Reversal
     end
 
     def to_s_block
-      whole_iseq, body = self.body
-      args = whole_iseq.argstring
-      args = "|#{args}|" if whole_iseq.stats[:arg_size] > 0
+      args, body = self.body
+      args = "|#{args}|" if args != ""
       result = []
       result << " do #{args}"
       result << body.indent.to_s
@@ -117,19 +116,16 @@ module Reversal
       result.join("\n")
     end
 
-    def post_init_defmethod
-      receiver, name, code, iseq = self.body
-      name = name.to_s
-      # alter name if necessary
-      name = name[1..-1] if name[0,1] == ":" # cut off leading :
-      name = (receiver.kind_of?(Integer) || receiver.fixnum?) ? "#{name}" : "#{receiver}.#{name}"
-      self[2] = name
-    end
-
     def to_s_defmethod
       receiver, name, code, argstring = self.body
+      # prep arguments
       args = argstring
       args = "(#{args})" if args != ""
+      # prep method name if necessary
+      name = name.to_s
+      name = name[1..-1] if name[0,1] == ":" # cut off leading :
+      name = (receiver.kind_of?(Integer) || receiver.fixnum?) ? "#{name}" : "#{receiver}.#{name}"
+      # output result
       result = []
       result << "def #{name}#{args}"
       result << code.indent.to_s
