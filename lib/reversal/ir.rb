@@ -111,7 +111,7 @@ module Reversal
       args = args.argstring
       args = "|#{args}|" if iseq.stats[:arg_size] > 0
       result = [" do #{args}"]
-      result.concat IRList.new(decompile_body(@iseq)).indent
+      result.concat IRList.new(decompile_body).indent
       result << "end"
       result.join("\n")
     end
@@ -125,11 +125,12 @@ module Reversal
       blockiseq[5] = name
       reverser = Reverser.new(blockiseq, parent)
       reverser.indent = 0
-      self[5] = IRList.new(reverser.decompile_body(blockiseq))
+      self[5] = IRList.new(reverser.decompile_body)
     end
 
     def to_s_defmethod
       receiver, name, iseq, parent, code = self.body
+      iseq = ISeq.new(iseq)
       args = iseq.argstring
       args = "(#{args})" if iseq.stats[:arg_size] > 0
       result = []

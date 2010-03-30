@@ -115,7 +115,7 @@ module Reversal
     end
     
     def decompile_block(iseq)
-      return r(:block, iseq.args, IRList.new(decompile_body(@iseq)))
+      return r(:block, iseq.args, IRList.new(decompile_body))
     end
     
     def decompile_method(iseq)
@@ -126,14 +126,14 @@ module Reversal
     # If it's just top-level code, then there are no args - just decompile
     # the body straight away
     def decompile_top(iseq)
-      IRList.new(decompile_body(@iseq))
+      IRList.new(decompile_body)
     end
     
     ##
     # If it's just top-level code, then there are no args - just decompile
     # the body straight away
     def decompile_class(iseq)
-      indent_array(IRList.new(decompile_body(@iseq)))
+      indent_array(IRList.new(decompile_body))
     end
     
     def remove_useless_dup
@@ -151,9 +151,10 @@ module Reversal
       !forward_jump?(current, label)
     end
     
-    def decompile_body(iseq, instruction = 0, stop = iseq.body.size)
+    def decompile_body(instruction = 0, stop = @iseq.body.size)
       # for now, using non-idiomatic while loop bc of a chance we might need to
       # loop back
+      iseq = @iseq
       while instruction < stop do
         inst = iseq.body[instruction]
         #p inst, @stack
