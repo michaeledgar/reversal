@@ -118,18 +118,16 @@ module Reversal
     end
 
     def post_init_defmethod
-      receiver, name, blockiseq, parent = self.body
+      receiver, name, code, iseq = self.body
       name = name.to_s
       # alter name if necessary
       name = name[1..-1] if name[0,1] == ":" # cut off leading :
       name = (receiver.kind_of?(Integer) || receiver.fixnum?) ? "#{name}" : "#{receiver}.#{name}"
       self[2] = name
-      reverser = Reverser.new(blockiseq, parent)
-      self[5] = IRList.new(reverser.decompile_body)
     end
 
     def to_s_defmethod
-      receiver, name, iseq, parent, code = self.body
+      receiver, name, code, iseq = self.body
       iseq = ISeq.new(iseq)
       args = iseq.argstring
       args = "(#{args})" if iseq.stats[:arg_size] > 0

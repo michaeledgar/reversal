@@ -47,7 +47,8 @@ module Reversal
     end
 
     def to_ir_method(iseq)
-      return r(:defmethod, r(:lit, 0), iseq.name, iseq, self)
+      reverser = Reverser.new(iseq, self) 
+      return r(:defmethod, r(:lit, 0), iseq.name, IRList.new(reverser.decompile_body), iseq)
     end
 
     ##

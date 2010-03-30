@@ -31,7 +31,8 @@ module Reversal
       if meth == :"core#define_method" || meth == :"core#define_singleton_method"
         # args will be [iseq, name, receiver, scope_arg]
         receiver, name, blockiseq = args
-        push r(:defmethod, receiver, name, blockiseq, self)
+        reverser = Reverser.new(blockiseq, self)
+        push r(:defmethod, receiver, name, IRList.new(reverser.decompile_body), blockiseq)
       # normal method call
       else
         remove_useless_dup if meth == :[]=
