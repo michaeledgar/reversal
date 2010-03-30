@@ -3,7 +3,11 @@ module Reversal
     # Send a message without much fanfare. Just a receiver, a method,
     # and maybe some args.     Maybe a block too.
     def do_simple_send(receiver, meth, args = [], block = nil)
-      push r(:send, meth, receiver, args, block, self)
+      if block
+        reverser = Reverser.new(block, self)
+        block = r(:block, ISeq.new(block).argstring, IRList.new(reverser.decompile_body))
+      end
+      push r(:send, meth, receiver, args, block)
     end
 
     ##

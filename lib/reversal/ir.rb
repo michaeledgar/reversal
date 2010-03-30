@@ -133,16 +133,9 @@ module Reversal
       result.join("\n")
     end
 
-    def post_init_send
-      blockiseq, parent = self[4], self[5]
-      if blockiseq
-        reverser = Reverser.new(blockiseq, parent)
-        self[4] = IRList.new([reverser.to_ir])
-      end
-    end
 
     def to_s_send
-      meth, receiver, args, blockiseq, parent = self.body
+      meth, receiver, args, blockiseq = self.body
       result = meth.to_s
       result = "#{receiver}.#{result}" unless receiver == :implicit
       result << (args.any? ? "(#{args.map {|a| a.to_s}.join(", ")})" : "")
