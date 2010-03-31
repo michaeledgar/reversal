@@ -156,10 +156,9 @@ module Reversal
       when :class
         first_line = "class #{data[0]}#{name}#{data[1]}"
       end
-      definition = ir.map {|x| x.to_s.split("\n").map {|x| "  " + x}.join("\n")}.join("\n")     
       result = []
       result << first_line
-      result << definition.to_s
+      result << ir.indent.to_s
       result << "end"
       result.join("\n")
     end

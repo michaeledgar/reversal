@@ -5,7 +5,7 @@ module Reversal
     def do_simple_send(receiver, meth, args = [], block = nil)
       if block
         reverser = Reverser.new(block, self)
-        block = r(:block, ISeq.new(block).argstring, IRList.new(reverser.decompile_body))
+        block = r(:block, ISeq.new(block).argstring, reverser.decompile_body)
       end
       push r(:send, meth, receiver, args, block)
     end
@@ -36,7 +36,7 @@ module Reversal
         # args will be [iseq, name, receiver, scope_arg]
         receiver, name, blockiseq = args
         reverser = Reverser.new(blockiseq, self)
-        push r(:defmethod, receiver, name, IRList.new(reverser.decompile_body), ISeq.new(blockiseq).argstring)
+        push r(:defmethod, receiver, name, reverser.decompile_body, ISeq.new(blockiseq).argstring)
       # normal method call
       else
         remove_useless_dup if meth == :[]=

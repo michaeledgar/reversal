@@ -43,27 +43,27 @@ module Reversal
     end
 
     def to_ir_block(iseq)
-      return r(:block, @iseq.argstring, IRList.new(decompile_body))
+      return r(:block, @iseq.argstring, decompile_body)
     end
 
     def to_ir_method(iseq)
       reverser = Reverser.new(iseq, self)
       iseq = ISeq.new(iseq)
-      return r(:defmethod, r(:lit, 0), iseq.name, IRList.new(reverser.decompile_body), iseq.argstring)
+      return r(:defmethod, r(:lit, 0), iseq.name, reverser.decompile_body, iseq.argstring)
     end
 
     ##
     # If it's just top-level code, then there are no args - just decompile
     # the body straight away
     def to_ir_top(iseq)
-      IRList.new(decompile_body)
+      decompile_body
     end
 
     ##
     # If it's just top-level code, then there are no args - just decompile
     # the body straight away
     def to_ir_class(iseq)
-      IRList.new(decompile_body)
+      decompile_body
     end
 
     ##
@@ -147,7 +147,7 @@ module Reversal
         end
         instruction += 1
       end
-      @stack
+      IRList.new(@stack)
     end
     
   end
