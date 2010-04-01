@@ -121,7 +121,15 @@ module Reversal
     def backward_jump?(current, label)
       !forward_jump?(current, label)
     end
-    
+
+    def next_instruction_number(cur_inst, cur_line)
+      if cur_inst.is_a?(Array) && (cur_inst[0] == :branchif || cur_inst[0] == :branchunless)
+        return cur_line + 1
+      else
+        return cur_line + 1
+      end
+    end
+
     def decompile_body(instruction = 0, stop = @iseq.body.size)
       # for now, using non-idiomatic while loop bc of a chance we might need to
       # loop back
@@ -145,7 +153,7 @@ module Reversal
           # call "decompile_#{instruction}"
           send("decompile_#{inst.first}".to_sym, inst, instruction) if respond_to?("decompile_#{inst.first}".to_sym)
         end
-        instruction += 1
+        instruction = next_instruction_number(inst, instruction)
       end
       r(:list, *@stack)
     end
