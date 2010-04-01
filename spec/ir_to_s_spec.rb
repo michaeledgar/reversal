@@ -83,4 +83,9 @@ describe "Intermediate Representation Strinfication" do
     ir = r(:block, "", Reversal::IRList.new([r(:getvar, "avar"), r(:setvar, "avar", r(:lit, 5))]))
     ir.to_s.should.equal(" do\n  avar\n  avar = 5\nend")
   end
+
+  it "converts blocks with arguments" do
+    ir = r(:block, "arg1, *rest", Reversal::IRList.new([r(:getvar, "avar"), r(:setvar, "avar", r(:lit, 5))]))
+    ir.to_s.should.equal(" do |arg1, *rest|\n  avar\n  avar = 5\nend")
+  end
 end
