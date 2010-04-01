@@ -2,6 +2,18 @@ require 'spec_helper'
 
 describe "Intermediate Representation Strinfication" do
 
+  it "converts list sexps" do
+    r(:list, "5", "10").to_s.should.equal("5\n10")
+  end
+
+  it "converts indented list sexps" do
+    r(:list, "5", "10").indent.to_s.should.equal("  5\n  10")
+  end
+
+  it "converts arbitrarily indented list sexps" do
+    r(:list, "5", "10").indent(5).to_s.should.equal("     5\n     10")
+  end
+
   it "converts literal integers" do
     r(:lit, 5).to_s.should.equal "5"
   end
@@ -80,12 +92,12 @@ describe "Intermediate Representation Strinfication" do
   end
 
   it "converts blocks with no arguments" do
-    ir = r(:block, "", Reversal::IRList.new([r(:getvar, "avar"), r(:setvar, "avar", r(:lit, 5))]))
+    ir = r(:block, "", r(:list, r(:getvar, "avar"), r(:setvar, "avar", r(:lit, 5))))
     ir.to_s.should.equal(" do\n  avar\n  avar = 5\nend")
   end
 
   it "converts blocks with arguments" do
-    ir = r(:block, "arg1, *rest", Reversal::IRList.new([r(:getvar, "avar"), r(:setvar, "avar", r(:lit, 5))]))
+    ir = r(:block, "arg1, *rest", r(:list, r(:getvar, "avar"), r(:setvar, "avar", r(:lit, 5))))
     ir.to_s.should.equal(" do |arg1, *rest|\n  avar\n  avar = 5\nend")
   end
 
@@ -121,35 +133,35 @@ describe "Intermediate Representation Strinfication" do
   end
 
   it "converts a method send with a block" do
-    block = r(:block, "", Reversal::IRList.new([r(:getvar, "avar"), r(:setvar, "avar", r(:lit, 5))]))
+    block = r(:block, "", r(:list, r(:getvar, "avar"), r(:setvar, "avar", r(:lit, 5))))
     ir = r(:send, :sillymethod, :implicit, [], block)
     ir.to_s.should.equal("sillymethod do\n  avar\n  avar = 5\nend")
   end
 
   it "converts a complex block with a complex method send" do
-    block = r(:block, "arg1, *rest", Reversal::IRList.new([r(:getvar, "avar"), r(:setvar, "avar", r(:lit, 5))]))
+    block = r(:block, "arg1, *rest", r(:list, r(:getvar, "avar"), r(:setvar, "avar", r(:lit, 5))))
     ir = r(:send, :sillymethod, r(:lit, "hello"), [r(:infix, :+, [r(:lit, 5), r(:lit, 10)]),
                                                    r(:send, :puts, :implicit, [r(:getvar, "hello")], nil)], block)
     ir.to_s.should.equal("\"hello\".sillymethod(5 + 10, puts(hello)) do |arg1, *rest|\n  avar\n  avar = 5\nend")
   end
 
   it "converts a simple method definition" do
-    ir = r(:defmethod, r(:lit, 0), :amethod, Reversal::IRList.new([r(:getvar, "avar")]), "")
+    ir = r(:defmethod, r(:lit, 0), :amethod, r(:list, r(:getvar, "avar")), "")
     ir.to_s.should.equal("def amethod\n  avar\nend")
   end
 
   it "converts a simple method definition with arguments" do
-    ir = r(:defmethod, r(:lit, 0), :amethod, Reversal::IRList.new([r(:getvar, "avar")]), "arg1, *rest")
+    ir = r(:defmethod, r(:lit, 0), :amethod, r(:list, r(:getvar, "avar")), "arg1, *rest")
     ir.to_s.should.equal("def amethod(arg1, *rest)\n  avar\nend")
   end
 
   it "converts a simple method definition with a receiver" do
-    ir = r(:defmethod, r(:getvar, :obj), :amethod, Reversal::IRList.new([r(:getvar, "avar")]), "")
+    ir = r(:defmethod, r(:getvar, :obj), :amethod, r(:list, r(:getvar, "avar")), "")
     ir.to_s.should.equal("def obj.amethod\n  avar\nend")
   end
 
   it "converts metaclass definitions" do
-    block = Reversal::IRList.new(r(:getvar, "avar"), r(:aset, r(:getvar, "hash"), r(:getvar, "key"), r(:getvar, "value")))
+    block = r(:list, r(:getvar, "avar"), r(:aset, r(:getvar, "hash"), r(:getvar, "key"), r(:getvar, "value")))
     ir = r(:general_module, :metaclass, r(:nil), block, [r(:getvar, "x")])
     ir.to_s.should.equal("class << x\n  avar\n  hash[key] = value\nend")
   end

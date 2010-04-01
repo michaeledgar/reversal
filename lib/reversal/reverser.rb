@@ -147,7 +147,7 @@ module Reversal
         end
         instruction += 1
       end
-      IRList.new(@stack)
+      r(:list, *@stack)
     end
     
   end

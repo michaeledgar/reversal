@@ -1,4 +1,5 @@
 module Reversal
+  class UnsupportedFieldException < StandardError; end
   class Sexp < Array
     def initialize(*args)
       super
@@ -30,6 +31,16 @@ module Reversal
       self.type == :lit && self[1].is_a?(Fixnum)
     end
 
+    def indent(amt = 2)
+      if self.type != :list
+        raise UnsupportedFieldException.new("Only list sexps can be indented.")
+      end
+      1.upto(self.size - 1) do |idx|
+        self[idx] = self[idx].to_s.split("\n").map {|x| " " * amt + x.to_s}.join("\n")
+      end
+      self
+    end
+
     def to_s
       if self.respond_to?("to_s_#{self.type}".to_sym)
         send("to_s_#{self.type}".to_sym)
@@ -37,6 +48,8 @@ module Reversal
         super
       end
     end
+
+    
 
     ####### to_s methods #########
     def to_s_lit
@@ -56,6 +69,10 @@ module Reversal
 
     def to_s_splat
       "*#{self[1]}"
+    end
+
+    def to_s_list
+      self.body.map {|x| x.to_s}.join("\n")
     end
 
     def to_s_array
