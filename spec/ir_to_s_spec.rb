@@ -78,4 +78,9 @@ describe "Intermediate Representation Strinfication" do
   it "converts array setting expressions" do
     r(:aset, r(:getvar, :ahash), r(:lit, :akey), r(:lit, 5)).to_s.should.equal "ahash[:akey] = 5"
   end
+
+  it "converts blocks with no arguments" do
+    ir = r(:block, "", Reversal::IRList.new([r(:getvar, "avar"), r(:setvar, "avar", r(:lit, 5))]))
+    ir.to_s.should.equal(" do\n  avar\n  avar = 5\nend")
+  end
 end

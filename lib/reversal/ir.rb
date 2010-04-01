@@ -108,9 +108,9 @@ module Reversal
 
     def to_s_block
       args, body = self.body
-      args = "|#{args}|" if args != ""
+      args = " |#{args}|" if args != ""
       result = []
-      result << " do #{args}"
+      result << " do#{args}"
       result << body.indent.to_s
       result << "end"
       result.join("\n")

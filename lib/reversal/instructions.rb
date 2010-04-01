@@ -340,10 +340,10 @@ module Reversal
       when 0x03
         do_simple_send :implicit, :next, [pop]
       when 0x04
-        pop #useless nil
+        remove_useless_dup #useless nil
         do_simple_send :implicit, :retry
       when 0x05
-        pop #useless nil
+        remove_useless_dup  #useless nil
         do_simple_send :implicit, :redo
       end
     end
@@ -351,7 +351,6 @@ module Reversal
     #############################
     ###### Classes/Modules ######
     #############################
-    ## TODO: IR
     def decompile_defineclass(inst, line_no)
       name, new_iseq, type = inst[1..-1]
       new_iseq = ISeq.new(new_iseq)
