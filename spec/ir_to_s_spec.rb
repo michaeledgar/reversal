@@ -165,4 +165,28 @@ describe "Intermediate Representation Strinfication" do
     ir = r(:general_module, :metaclass, r(:nil), block, [r(:getvar, "x")])
     ir.to_s.should.equal("class << x\n  avar\n  hash[key] = value\nend")
   end
+
+  it "converts normal class definitions without a superclass" do
+    block = r(:list, r(:getvar, "avar"), r(:aset, r(:getvar, "hash"), r(:getvar, "key"), r(:getvar, "value")))
+    ir = r(:general_module, :class, r(:getvar, :Silly), block, ["", ""])
+    ir.to_s.should.equal("class Silly\n  avar\n  hash[key] = value\nend")
+  end
+
+  it "converts normal class definitions with a superclass and a module base" do
+    block = r(:list, r(:getvar, "avar"), r(:aset, r(:getvar, "hash"), r(:getvar, "key"), r(:getvar, "value")))
+    ir = r(:general_module, :class, r(:getvar, :Silly), block, ["Base::", " < Super"])
+    ir.to_s.should.equal("class Base::Silly < Super\n  avar\n  hash[key] = value\nend")
+  end
+
+  it "converts a module definition" do
+    block = r(:list, r(:getvar, "avar"), r(:aset, r(:getvar, "hash"), r(:getvar, "key"), r(:getvar, "value")))
+    ir = r(:general_module, :module, r(:getvar, :Silly), block, [""])
+    ir.to_s.should.equal("module Silly\n  avar\n  hash[key] = value\nend")
+  end
+
+  it "converts a module definition with a base module" do
+    block = r(:list, r(:getvar, "avar"), r(:aset, r(:getvar, "hash"), r(:getvar, "key"), r(:getvar, "value")))
+    ir = r(:general_module, :module, r(:getvar, :Silly), block, ["Base::"])
+    ir.to_s.should.equal("module Base::Silly\n  avar\n  hash[key] = value\nend")
+  end
 end
