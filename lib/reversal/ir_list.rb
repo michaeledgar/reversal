@@ -2,10 +2,10 @@ require 'delegate'
 module Reversal
   class IRList < DelegateClass(Array)
     def initialize(*args)
-      if args.first.is_a? Array
-        @source = args.first
-      else
+      if args.first.is_a? Sexp
         @source = args
+      else
+        @source = args.first
       end
       super(@source)
     end
