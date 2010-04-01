@@ -103,4 +103,20 @@ describe "Intermediate Representation Strinfication" do
     ir = r(:send, :sillymethod, r(:lit, "hello"), [r(:getvar, "arg")], nil)
     ir.to_s.should.equal("\"hello\".sillymethod(arg)")
   end
+
+  it "converts method calls with a receiver and two complex argument" do
+    ir = r(:send, :sillymethod, r(:lit, "hello"), [r(:infix, :+, [r(:lit, 5), r(:lit, 10)]),
+                                                   r(:send, :puts, :implicit, [r(:getvar, "hello")], nil)], nil)
+    ir.to_s.should.equal("\"hello\".sillymethod(5 + 10, puts(hello))")
+  end
+
+  it "converts method calls with an operator in the ugly manner" do
+    ir = r(:send, :+, r(:lit, 5), [r(:lit, 10)], nil)
+    ir.to_s.should.equal("5.+(10)")
+  end
+
+  it "converts implicit method calls with the []= operator in an ugly manner" do
+    ir = r(:send, :[]=, r(:getvar, "hash"), [r(:getvar, "key"), r(:getvar, "value")], nil)
+    ir.to_s.should.equal("hash.[]=(key, value)")
+  end
 end
