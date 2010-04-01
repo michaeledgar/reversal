@@ -119,4 +119,17 @@ describe "Intermediate Representation Strinfication" do
     ir = r(:send, :[]=, r(:getvar, "hash"), [r(:getvar, "key"), r(:getvar, "value")], nil)
     ir.to_s.should.equal("hash.[]=(key, value)")
   end
+
+  it "converts a method send with a block" do
+    block = r(:block, "", Reversal::IRList.new([r(:getvar, "avar"), r(:setvar, "avar", r(:lit, 5))]))
+    ir = r(:send, :sillymethod, :implicit, [], block)
+    ir.to_s.should.equal("sillymethod do\n  avar\n  avar = 5\nend")
+  end
+
+  it "converts a complex block with a complex method send" do
+    block = r(:block, "arg1, *rest", Reversal::IRList.new([r(:getvar, "avar"), r(:setvar, "avar", r(:lit, 5))]))
+    ir = r(:send, :sillymethod, r(:lit, "hello"), [r(:infix, :+, [r(:lit, 5), r(:lit, 10)]),
+                                                   r(:send, :puts, :implicit, [r(:getvar, "hello")], nil)], block)
+    ir.to_s.should.equal("\"hello\".sillymethod(5 + 10, puts(hello)) do |arg1, *rest|\n  avar\n  avar = 5\nend")
+  end
 end
