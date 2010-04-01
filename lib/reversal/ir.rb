@@ -191,9 +191,13 @@ module Reversal
       result = []
       result << "if #{predicate.to_s}"
       result << ifblock.indent.to_s
-      result << "else"
-      result << elseblock.indent.to_s
-      result << "end"
+      if elseblock.body.size == 1 && elseblock.body.first.type == :if
+        result << "els" + elseblock.body.first.to_s
+      else
+        result << "else"
+        result << elseblock.indent.to_s
+        result << "end"
+      end
       result.join("\n")
     end
 

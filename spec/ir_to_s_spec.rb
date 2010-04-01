@@ -205,4 +205,14 @@ describe "Intermediate Representation Strinfication" do
     ir = r(:unless, predicate, block1, block2)
     ir.to_s.should.equal("unless x == 10\n  nil\nelse\n  2\nend")
   end
+
+  it "converts a chained if-elsif-else branch" do
+    block1 = r(:list, r(:nil))
+    block2 = r(:list, r(:lit, 2))
+    block3 = r(:list, r(:lit, true))
+    predicate1 = r(:infix, :==, [r(:getvar, "x"), r(:lit, 10)])
+    predicate2 = r(:infix, :==, [r(:getvar, "x"), r(:lit, 30)])
+    ir = r(:if, predicate1, block1, r(:list, r(:if, predicate2, block2, block3)))
+    ir.to_s.should.equal("if x == 10\n  nil\nelsif x == 30\n  2\nelse\n  true\nend")
+  end
 end

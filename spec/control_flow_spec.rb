@@ -88,22 +88,22 @@ RESULT
   end
   
   it "can decompile a single if statement" do
-    @single_if.assert_correct_ignoring_indentation
+    @single_if.assert_correct
   end
   
   it "can decompile elsif branches retaining the structure" do
-    @elsif_branches.assert_correct_ignoring_indentation
+    @elsif_branches.assert_correct
   end
   
   it "can decompile a simple unless statement to equivalent code" do
-    @single_unless.assert_correct_ignoring_indentation
+    @single_unless.assert_correct
   end
   
   it "can decompile a guard-if statement to equivalent code" do
-    @trailing_if.assert_correct_ignoring_indentation
+    @trailing_if.assert_correct
   end
   
   it "can decompile a guard-unless statement to equivalent code" do
-    @trailing_unless.assert_correct_ignoring_indentation
+    @trailing_unless.assert_correct
   end
 end
