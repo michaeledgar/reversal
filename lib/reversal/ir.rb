@@ -16,7 +16,7 @@ module Reversal
     end
 
     def simple?
-      ![:infix, :if, :else, :setvar, :aset].include?(self.type)
+      ![:infix, :if, :unless, :setvar, :aset, :general_module, :defmethod, :block].include?(self.type)
     end
 
     def nil?
