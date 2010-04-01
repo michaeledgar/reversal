@@ -276,33 +276,43 @@ module Reversal
     ##### Control Flow ####
     #######################
     ## TODO: IR
-    def decompile_branchunless(inst, line_no)
+    def decompile_branchunless(inst, line_no, is_unless = false)
       target = inst[1]
       forward = forward_jump?(line_no, target)
       if forward
-        # elsif check
+        # [:getvar, x]
+        # [branchunless, :label_1]
+        # [:lit, 5]
+        # [:jump, :label_2]
+        # :label_1
+        # [:putnil]
+        # :label_5
+        #
+        #  becomes
+        #  if x
+        #    nil
+        #  else
+        #    5
+        #  end
         predicate = pop
-        if @stack.last.to_s.strip == "else"
-          pop
-          @end_stack.pop # one less end
-          push "elsif (#{predicate})"
+        reverser = Reverser.new(@iseq, @parent)
+        reverser.reset!
+        block1 = reverser.decompile_body(line_no + 1, @iseq.labels[target] - 1)
+        end_jump_inst = @iseq.body[@iseq.labels[target] - 1]
+        end_jump_target = end_jump_inst[1]
+        reverser.reset!
+        block2 = reverser.decompile_body(@iseq.labels[target], @iseq.labels[end_jump_target])
+        if is_unless
+          push r(:unless, predicate, block1, block2)
         else
-          push "if (#{predicate})"
+          push r(:if, predicate, block1, block2)
         end
-        @else_stack.push target
       end
     end
     
     ## TODO: IR
     def decompile_branchif(inst, line_no)
-      target = inst[1]
-      forward = forward_jump?(line_no, target)
-      if forward
-        # no elsif check
-        predicate = pop
-        push "unless (#{predicate})"
-        @else_stack.push target
-      end
+      decompile_branchunless(true)
     end
     
     ## TODO: IR

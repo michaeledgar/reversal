@@ -124,7 +124,12 @@ module Reversal
 
     def next_instruction_number(cur_inst, cur_line)
       if cur_inst.is_a?(Array) && (cur_inst[0] == :branchif || cur_inst[0] == :branchunless)
-        return cur_line + 1
+        target = cur_inst[1]
+        location_of_target = @iseq.labels[target]
+        else_instruction = @iseq.body[location_of_target - 1]
+        else_target = else_instruction[1]
+        location_of_else_target = @iseq.labels[else_target]
+        return location_of_else_target
       else
         return cur_line + 1
       end
@@ -144,10 +149,6 @@ module Reversal
           @current_line = inst    # unused
         when Symbol
           # :label_y
-          while inst == @end_stack.last do
-            @end_stack.pop
-            push "end"
-          end
         when Array
           # [:instruction, *args]
           # call "decompile_#{instruction}"

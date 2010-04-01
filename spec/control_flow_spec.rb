@@ -10,7 +10,7 @@ def test(x)
 end
 CLASS
 def test(x)
-  if (x)
+  if x
     5
   else
     nil
@@ -30,11 +30,11 @@ def test(x)
 end
 CLASS
 def test(x)
-  if (x)
+  if x
     5
-  elsif (y)
+  elsif y
     10
-  elsif (z)
+  elsif z
     20
   else
     nil
@@ -50,7 +50,7 @@ def test(x)
 end
 CLASS
 def test(x)
-  if (x)
+  if x
     nil
   else
     5
@@ -64,7 +64,7 @@ def test(x)
 end
 CLASS
 def test(x)
-  if (y)
+  if y
     x = 10
   else
     nil
@@ -78,7 +78,7 @@ def test(x)
 end
 CLASS
 def test(x)
-  if (y)
+  if y
     nil
   else
     x = 10
