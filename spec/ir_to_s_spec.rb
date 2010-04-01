@@ -142,4 +142,15 @@ describe "Intermediate Representation Strinfication" do
     ir = r(:defmethod, r(:lit, 0), :amethod, Reversal::IRList.new([r(:getvar, "avar")]), "arg1, *rest")
     ir.to_s.should.equal("def amethod(arg1, *rest)\n  avar\nend")
   end
+
+  it "converts a simple method definition with a receiver" do
+    ir = r(:defmethod, r(:getvar, :obj), :amethod, Reversal::IRList.new([r(:getvar, "avar")]), "")
+    ir.to_s.should.equal("def obj.amethod\n  avar\nend")
+  end
+
+  it "converts metaclass definitions" do
+    block = Reversal::IRList.new(r(:getvar, "avar"), r(:aset, r(:getvar, "hash"), r(:getvar, "key"), r(:getvar, "value")))
+    ir = r(:general_module, :metaclass, r(:nil), block, [r(:getvar, "x")])
+    ir.to_s.should.equal("class << x\n  avar\n  hash[key] = value\nend")
+  end
 end
