@@ -178,6 +178,8 @@ module Reversal
         first_line = "class << #{data[0]}"
       when :class
         first_line = "class #{data[0]}#{name}#{data[1]}"
+      else
+        raise ArgumentError.new("Incorrect type of general module provided: #{type.inspect}")
       end
       result = []
       result << first_line
@@ -192,8 +194,10 @@ module Reversal
       result << "if #{predicate.to_s}"
       result << ifblock.indent.to_s
       if elseblock.body.size == 1 && elseblock.body.first.type == :if
+        # chain to the next if!
         result << "els" + elseblock.body.first.to_s
       else
+        # got a real else block? then do it here.
         result << "else"
         result << elseblock.indent.to_s
         result << "end"
