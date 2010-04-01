@@ -185,6 +185,28 @@ module Reversal
       result << "end"
       result.join("\n")
     end
+
+    def to_s_if
+      predicate, ifblock, elseblock = self.body
+      result = []
+      result << "if #{predicate.to_s}"
+      result << ifblock.indent.to_s
+      result << "else"
+      result << elseblock.indent.to_s
+      result << "end"
+      result.join("\n")
+    end
+
+    def to_s_unless
+      predicate, ifblock, elseblock = self.body
+      result = []
+      result << "unless #{predicate.to_s}"
+      result << ifblock.indent.to_s
+      result << "else"
+      result << elseblock.indent.to_s
+      result << "end"
+      result.join("\n")
+    end
   end
 end
 

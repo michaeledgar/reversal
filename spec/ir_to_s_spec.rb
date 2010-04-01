@@ -189,4 +189,20 @@ describe "Intermediate Representation Strinfication" do
     ir = r(:general_module, :module, r(:getvar, :Silly), block, ["Base::"])
     ir.to_s.should.equal("module Base::Silly\n  avar\n  hash[key] = value\nend")
   end
+
+  it "converts a simple if-else branch" do
+    block1 = r(:list, r(:nil))
+    block2 = r(:list, r(:lit, 2))
+    predicate = r(:infix, :==, [r(:getvar, "x"), r(:lit, 10)])
+    ir = r(:if, predicate, block1, block2)
+    ir.to_s.should.equal("if x == 10\n  nil\nelse\n  2\nend")
+  end
+
+  it "converts a simple unless-else branch" do
+    block1 = r(:list, r(:nil))
+    block2 = r(:list, r(:lit, 2))
+    predicate = r(:infix, :==, [r(:getvar, "x"), r(:lit, 10)])
+    ir = r(:unless, predicate, block1, block2)
+    ir.to_s.should.equal("unless x == 10\n  nil\nelse\n  2\nend")
+  end
 end
