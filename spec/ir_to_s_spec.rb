@@ -88,4 +88,19 @@ describe "Intermediate Representation Strinfication" do
     ir = r(:block, "arg1, *rest", Reversal::IRList.new([r(:getvar, "avar"), r(:setvar, "avar", r(:lit, 5))]))
     ir.to_s.should.equal(" do |arg1, *rest|\n  avar\n  avar = 5\nend")
   end
+
+  it "converts method calls with no receiver or arguments" do
+    ir = r(:send, :sillymethod, :implicit, [], nil)
+    ir.to_s.should.equal("sillymethod")
+  end
+
+  it "converts method calls with a receiver but no arguments" do
+    ir = r(:send, :sillymethod, r(:lit, 5), [], nil)
+    ir.to_s.should.equal("5.sillymethod")
+  end
+
+  it "converts method calls with a receiver and a simple argument" do
+    ir = r(:send, :sillymethod, r(:lit, "hello"), [r(:getvar, "arg")], nil)
+    ir.to_s.should.equal("\"hello\".sillymethod(arg)")
+  end
 end

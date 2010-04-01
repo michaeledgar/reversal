@@ -134,6 +134,12 @@ module Reversal
     end
 
 
+    ##
+    # Send IR: r(:send, method, receilver, args, blockiseq)
+    # method: symbol or string
+    # receiver: string or Sexp or :implicit for none
+    # args: Array ?
+    # blockiseq: :block Sexp
     def to_s_send
       meth, receiver, args, blockiseq = self.body
       result = meth.to_s
