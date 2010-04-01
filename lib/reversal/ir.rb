@@ -124,7 +124,7 @@ module Reversal
       # prep method name if necessary
       name = name.to_s
       name = name[1..-1] if name[0,1] == ":" # cut off leading :
-      name = (receiver.kind_of?(Integer) || receiver.fixnum?) ? "#{name}" : "#{receiver}.#{name}"
+      name = receiver.fixnum? ? "#{name}" : "#{receiver}.#{name}"
       # output result
       result = []
       result << "def #{name}#{args}"

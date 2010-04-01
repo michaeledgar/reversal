@@ -132,4 +132,14 @@ describe "Intermediate Representation Strinfication" do
                                                    r(:send, :puts, :implicit, [r(:getvar, "hello")], nil)], block)
     ir.to_s.should.equal("\"hello\".sillymethod(5 + 10, puts(hello)) do |arg1, *rest|\n  avar\n  avar = 5\nend")
   end
+
+  it "converts a simple method definition" do
+    ir = r(:defmethod, r(:lit, 0), :amethod, Reversal::IRList.new([r(:getvar, "avar")]), "")
+    ir.to_s.should.equal("def amethod\n  avar\nend")
+  end
+
+  it "converts a simple method definition with arguments" do
+    ir = r(:defmethod, r(:lit, 0), :amethod, Reversal::IRList.new([r(:getvar, "avar")]), "arg1, *rest")
+    ir.to_s.should.equal("def amethod(arg1, *rest)\n  avar\nend")
+  end
 end
