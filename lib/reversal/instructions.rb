@@ -117,6 +117,9 @@ module Reversal
       # for some reason, there seems to cause a :dup instruction to be inserted that fucks
       # everything up. So i'll pop the return value.
       remove_useless_dup
+      unless scoping_arg.fixnum?
+        name = "#{scoping_arg}::#{name}"
+      end
       push r(:setvar, name, value)
     end
     
@@ -196,8 +199,6 @@ module Reversal
       push r(:lit, inst[1])
     end
       
-      
-    ## TODO: IR
     def decompile_putiseq(inst, line_no)
       push inst[1]
     end
@@ -277,7 +278,6 @@ module Reversal
     #######################
     ##### Control Flow ####
     #######################
-    ## TODO: IR
     def decompile_branchunless(inst, line_no, is_unless = false)
       target = inst[1]
       forward = forward_jump?(line_no, target)
@@ -312,24 +312,8 @@ module Reversal
       end
     end
     
-    ## TODO: IR
     def decompile_branchif(inst, line_no)
-      decompile_branchunless(true)
-    end
-    
-    ## TODO: IR
-    def decompile_jump(inst, line_no)
-      target = inst[1]
-      forward = forward_jump?(line_no, target)
-      if forward
-        # is this an else branch?
-        if @iseq.body[line_no + 1] == @else_stack.last
-          # we're an else!
-          @end_stack.push target # that's when the else ends
-          push "else"
-          @else_stack.pop
-        end
-      end
+      decompile_branchunless(true, line_no)
     end
     
     def decompile_throw(inst, line_no)

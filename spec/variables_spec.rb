@@ -115,7 +115,9 @@ def get_special_var_number
 end
 EOF
 
+
     @set_constant = CompiledDecompilationTestCase.new("ALOHA = 10", "ALOHA = 10")
+    @set_constant_base = CompiledDecompilationTestCase.new("Silly::ALOHA = 10", "Silly::ALOHA = 10")
     
     @get_constant = DecompilationTestCase.new(A, :get_constant, <<-EOF)
 def get_constant
@@ -172,6 +174,10 @@ EOF
   
   it "can decompile the simplest case for setting a constant" do
     @set_constant.assert_correct
+  end
+
+  it "can decompile setting a constant with a base" do
+    @set_constant_base.assert_correct
   end
   
   it "can decompile the retrieval of a constant" do
