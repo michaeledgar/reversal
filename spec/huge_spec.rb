@@ -12,7 +12,13 @@ module Hello
       super
       @name = some_thing.to_s
     end
-    
+
+    def self.has_moon(size = MoonSizes::TINY)
+      @@moons = []
+      @@moons << Universe::Stuff::Moon.new(size)
+      @@moons
+    end
+
     def orbit!(optional_arg = 10, required_arg, &blk)
       @moons.each do |moon|
         if moon.spherical(:not_cube => true)
@@ -40,6 +46,11 @@ module Hello
     def initialize(some_thing, silly_arg = some_thing.to_s, *args)
       super
       @name = some_thing.to_s
+    end
+    def self.has_moon(size = MoonSizes::TINY)
+      @@moons = []
+      @@moons << Universe::Stuff::Moon.new(size)
+      @@moons
     end
     def orbit!(optional_arg = 10, required_arg, &blk)
       @moons.each do |moon|
