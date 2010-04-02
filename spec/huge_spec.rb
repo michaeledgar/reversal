@@ -8,14 +8,18 @@ module Hello
   class World < Universe
     attr_accessor :name
     self.attr_writer :moons
-    def initialize(some_thing, *args)
+    def initialize(some_thing, silly_arg = some_thing.to_s, *args)
       super
       @name = some_thing.to_s
     end
     
-    def orbit!(&blk)
+    def orbit!(optional_arg = 10, required_arg, &blk)
       @moons.each do |moon|
-        moon.rotate
+        if moon.spherical(:not_cube => true)
+          moon.rotate
+        else
+          moon.cubify
+        end
         moon.revolve! :twice
         class << moon
           def crash_into(other_planet)
@@ -33,13 +37,17 @@ module Hello
   class World < Universe
     attr_accessor(:name)
     self.attr_writer(:moons)
-    def initialize(some_thing, *args)
+    def initialize(some_thing, silly_arg = some_thing.to_s, *args)
       super
       @name = some_thing.to_s
     end
-    def orbit!(&blk)
+    def orbit!(optional_arg = 10, required_arg, &blk)
       @moons.each do |moon|
-        moon.rotate
+        if moon.spherical({:not_cube => true})
+          moon.rotate
+        else
+          moon.cubify
+        end
         moon.revolve!(:twice)
         class << moon
           def crash_into(other_planet)
