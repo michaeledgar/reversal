@@ -63,7 +63,8 @@ module Reversal
       push r(:getvar, inst[1])
     end
     alias_method :decompile_getglobal, :decompile_getinstancevariable
-    
+    alias_method :decompile_getclassvariable, :decompile_getinstancevariable
+
     def decompile_getconstant(inst, line_no)
       base = pop
       base_str = (base.nil?) ? "" : "#{base}::"
@@ -107,7 +108,8 @@ module Reversal
       push r(:setvar, inst[1], value)
     end
     alias_method :decompile_setglobal, :decompile_setinstancevariable
-      
+    alias_method :decompile_setclassvariable, :decompile_setinstancevariable
+
     def decompile_setconstant(inst, line_no)
       # [:setconstant, :const_name_as_symbol]
       name = inst[1]

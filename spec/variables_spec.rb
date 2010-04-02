@@ -13,7 +13,15 @@ class A
   def assigns_and_gets_ivar
     @some_ivar = @another_ivar
   end
-  
+
+  def assigns_cvar(val)
+    @@some_cvar = 5
+  end
+
+  def assigns_and_gets_cvar
+    @@some_cvar = @@another_cvar
+  end
+
   def set_global_var
     $aloha = 10
   end
@@ -51,16 +59,29 @@ def simple
   b = 15
 end
 EOF
-    
+
     @assigns_ivar_case = DecompilationTestCase.new(A, :assigns_ivar, <<-EOF)
 def assigns_ivar(val)
   @some_ivar = 5
 end
 EOF
-    
+
     @assigns_ivar_set_get_case = DecompilationTestCase.new(A, :assigns_and_gets_ivar, <<-EOF)
 def assigns_and_gets_ivar
   @some_ivar = @another_ivar
+end
+EOF
+
+
+    @assigns_cvar_case = DecompilationTestCase.new(A, :assigns_cvar, <<-EOF)
+def assigns_cvar(val)
+  @@some_cvar = 5
+end
+EOF
+
+    @assigns_cvar_set_get_case = DecompilationTestCase.new(A, :assigns_and_gets_cvar, <<-EOF)
+def assigns_and_gets_cvar
+  @@some_cvar = @@another_cvar
 end
 EOF
 
@@ -119,6 +140,14 @@ EOF
   
   it "can decompile a method that assigns and gets an instance variable" do
     @assigns_ivar_set_get_case.assert_correct
+  end
+
+  it "can decompile a method that assigns a class variable" do
+    @assigns_cvar_case.assert_correct
+  end
+
+  it "can decompile a method that assigns and gets a class variable" do
+    @assigns_cvar_set_get_case.assert_correct
   end
   
   it "can decompile a method assigning a global variable" do
