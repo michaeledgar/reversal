@@ -17,12 +17,11 @@ require 'reversal/reverser'
 
 
 module Reversal
-  VERSION = "0.1.0"
+  VERSION = "0.9.0"
   
   class << self
-    def decompile(meth_or_proc)
-      iseq = RubyVM::InstructionSequence.from_method(meth_or_proc)
-      Reverser.for(iseq).to_ir
+    def decompile(iseq)
+      Reverser.new(iseq).to_ir.to_s
     end
   end
 end
