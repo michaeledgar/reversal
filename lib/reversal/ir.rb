@@ -204,8 +204,10 @@ module Reversal
         result << "els" + elseblock.body.first.to_s
       else
         # got a real else block? then do it here.
-        result << "else"
-        result << elseblock.indent.to_s
+        if elseblock != r(:list, r(:nil))
+          result << "else"
+          result << elseblock.indent.to_s
+        end
         result << "end"
       end
       result.join("\n")

@@ -12,8 +12,6 @@ CLASS
 def test(x)
   if x
     5
-  else
-    nil
   end
 end
 RESULT
@@ -36,8 +34,6 @@ def test(x)
     10
   elsif z
     20
-  else
-    nil
   end
 end
 RESULT
@@ -66,8 +62,6 @@ CLASS
 def test(x)
   if y
     x = 10
-  else
-    nil
   end
 end
 RESULT
@@ -82,6 +76,22 @@ def test(x)
     nil
   else
     x = 10
+  end
+end
+RESULT
+
+    @uses_andand = CompiledDecompilationTestCase.new <<CLASS, <<RESULT
+def test(x)
+  if x && y
+    puts(x)
+  end
+end
+CLASS
+def test(x)
+  if x
+    if y
+      puts(x)
+    end
   end
 end
 RESULT
@@ -105,5 +115,9 @@ RESULT
   
   it "can decompile a guard-unless statement to equivalent code" do
     @trailing_unless.assert_correct
+  end
+
+  it "can decompile a conditional using the && operator" do
+    @uses_andand.assert_correct
   end
 end
