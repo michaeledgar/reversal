@@ -127,9 +127,13 @@ module Reversal
         target = cur_inst[1]
         location_of_target = @iseq.labels[target]
         else_instruction = @iseq.body[location_of_target - 1]
-        else_target = else_instruction[1]
-        location_of_else_target = @iseq.labels[else_target]
-        return location_of_else_target
+        if else_instruction.first == :jump
+          else_target = else_instruction[1]
+          location_of_else_target = @iseq.labels[else_target]
+          return location_of_else_target
+        else
+          return @iseq.body.size
+        end
       elsif cur_inst.is_a?(Array) && (cur_inst[0] == :leave)
         return @iseq.body.size + 1
       else

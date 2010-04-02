@@ -20,4 +20,34 @@ RESULT
     defined_simple.assert_correct
   end
 
+  it "reverses the ?x syntax to equivalent code" do
+    question_mark = CompiledDecompilationTestCase.new <<CLASS, <<RESULT
+?y
+CLASS
+"y"
+RESULT
+    question_mark.assert_correct
+  end
+
+  it "reverses multi-line branch predicates to equivalent code" do
+    question_mark = CompiledDecompilationTestCase.new <<CLASS, <<RESULT
+if (x = 10; y = 20; 30)
+  nil
+else
+  10
+end
+CLASS
+x = 10
+y = 20
+if 30
+  nil
+else
+  10
+end
+RESULT
+    require 'pp'
+    pp question_mark.seq.to_a
+    question_mark.assert_correct
+  end
+
 end

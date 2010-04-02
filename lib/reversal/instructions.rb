@@ -306,9 +306,14 @@ module Reversal
         reverser.reset!
         block1 = reverser.decompile_body(line_no + 1, @iseq.labels[target] - 1)
         end_jump_inst = @iseq.body[@iseq.labels[target] - 1]
-        end_jump_target = end_jump_inst[1]
+        if end_jump_inst.first == :jump
+          end_jump_target = end_jump_inst[1]
+          block_2_end = @iseq.labels[end_jump_target]
+        else
+          block_2_end = @iseq.body.size
+        end
         reverser.reset!
-        block2 = reverser.decompile_body(@iseq.labels[target], @iseq.labels[end_jump_target])
+        block2 = reverser.decompile_body(@iseq.labels[target], block_2_end)
         if is_unless
           push r(:unless, predicate, block1, block2)
         else
