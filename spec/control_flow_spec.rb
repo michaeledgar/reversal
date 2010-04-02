@@ -110,7 +110,6 @@ def test(x)
     end
   else
     puts(x)
-    nil
   end
 end
 RESULT

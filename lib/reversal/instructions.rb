@@ -306,7 +306,7 @@ module Reversal
         reverser.reset!
         block1 = reverser.decompile_body(line_no + 1, target)
         end_jump_inst = @iseq.body[@iseq.labels[target] - 1]
-        if end_jump_inst.first == :jump
+        if [:jump, :branchunless, :branchif].include? end_jump_inst.first
           block_2_end = end_jump_inst[1]
         else
           block_2_end = @iseq.body.size
