@@ -45,8 +45,6 @@ else
   10
 end
 RESULT
-    require 'pp'
-    pp question_mark.seq.to_a
     question_mark.assert_correct
   end
 

@@ -94,7 +94,7 @@ module Reversal
       value = pop
       # for some reason, there seems to cause a :dup instruction to be inserted that fucks
       # everything up. So i'll pop the return value.
-      remove_useless_dup
+      remove_useless_dup unless @iseq.type == :top
       push r(:setvar, locals[inst[1] - 1], value)
     end
       

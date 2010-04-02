@@ -132,7 +132,7 @@ module Reversal
           location_of_else_target = @iseq.labels[else_target]
           return location_of_else_target
         else
-          return @iseq.body.size
+          return @iseq.body.size + 1
         end
       elsif cur_inst.is_a?(Array) && (cur_inst[0] == :leave)
         return @iseq.body.size + 1
