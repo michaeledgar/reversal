@@ -130,6 +130,8 @@ module Reversal
         else_target = else_instruction[1]
         location_of_else_target = @iseq.labels[else_target]
         return location_of_else_target
+      elsif cur_inst.is_a?(Array) && (cur_inst[0] == :leave)
+        return @iseq.body.size + 1
       else
         return cur_line + 1
       end

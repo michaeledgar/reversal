@@ -260,6 +260,11 @@ module Reversal
       # [:opt_succ]
       do_simple_send(pop, :succ)
     end
+    def decompile_defined(inst, line_no)
+      # [:defined, type, var, needs_string]
+      pop # there's a var used for lookups... not necessary for stringification
+      do_simple_send(:implicit, :defined?, [inst[2]])
+    end
       
     ##############################
     ##### Method Dispatch ########
