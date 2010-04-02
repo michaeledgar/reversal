@@ -41,45 +41,47 @@ module Reversal
       self
     end
 
-    def to_s
+    def to_s(options = {})
       if self.respond_to?("to_s_#{self.type}".to_sym)
-        send("to_s_#{self.type}".to_sym)
+        send("to_s_#{self.type}".to_sym, options)
       else
         super
       end
     end
 
-    
-
     ####### to_s methods #########
-    def to_s_lit
+    def to_s_lit(options = {})
       # [:lit, 5]
       self[1].inspect
     end
 
-    def to_s_getvar
+    def to_s_getvar(options = {})
       # [:getvar, :HELLO]
       # [:getvar, :@hello]
       self[1].to_s
     end
 
-    def to_s_setvar
+    def to_s_setvar(options = {})
       "#{self[1]} = #{self[2]}"
     end
 
-    def to_s_splat
+    def to_s_splat(options = {})
       "*#{self[1]}"
     end
 
-    def to_s_list
-      self.body.map {|x| x.to_s}.join("\n")
+    def to_s_list(options = {})
+      if options[:one_line]
+        self.body.map {|x| x.to_s.lstrip}.join("; ")
+      else
+        self.body.map {|x| x.to_s}.join("\n")
+      end
     end
 
-    def to_s_array
+    def to_s_array(options = {})
       "[#{self[1].map {|x| x.to_s}.join(", ")}]"
     end
 
-    def to_s_range
+    def to_s_range(options = {})
       start, stop, flag = self[1..-1]
       if flag # inclusive?
         "(#{start}..#{stop})"
@@ -88,7 +90,7 @@ module Reversal
       end
     end
 
-    def to_s_infix
+    def to_s_infix(options = {})
       operator, args  = self[1], self[2]
       need_parens = (args.all? {|x| x.is_a?(Sexp) && x.simple?})
       if need_parens
@@ -101,29 +103,29 @@ module Reversal
       end
     end
 
-    def to_s_hash
+    def to_s_hash(options = {})
       list = self[1]
       list.map! {|(k, v)| "#{k} => #{v}" }
       "{#{list.join(', ')}}"
     end
 
-    def to_s_nil
+    def to_s_nil(options = {})
       "nil"
     end
 
-    def to_s_not
+    def to_s_not(options = {})
       "!#{self[1]}"
     end
 
-    def to_s_aref
+    def to_s_aref(options = {})
       "#{self[1]}[#{self[2]}]"
     end
 
-    def to_s_aset
+    def to_s_aset(options = {})
       "#{self[1]}[#{self[2]}] = #{self[3]}"
     end
 
-    def to_s_block
+    def to_s_block(options = {})
       args, body = self.body
       args = " |#{args}|" if args != ""
       result = []
@@ -133,7 +135,7 @@ module Reversal
       result.join("\n")
     end
 
-    def to_s_defmethod
+    def to_s_defmethod(options = {})
       receiver, name, code, argstring = self.body
       # prep arguments
       args = argstring
@@ -157,7 +159,7 @@ module Reversal
     # receiver: string or Sexp or :implicit for none
     # args: Array ?
     # blockiseq: :block Sexp
-    def to_s_send
+    def to_s_send(options = {})
       meth, receiver, args, blockiseq = self.body
       result = meth.to_s
       result = "#{receiver}.#{result}" unless receiver == :implicit
@@ -169,7 +171,7 @@ module Reversal
       result
     end
 
-    def to_s_general_module
+    def to_s_general_module(options = {})
       type, name, ir, data = self.body
       case type
       when :module
@@ -188,7 +190,7 @@ module Reversal
       result.join("\n")
     end
 
-    def to_s_if
+    def to_s_if(options = {})
       predicate, ifblock, elseblock = self.body
       result = []
       result << "if #{predicate.to_s}"
@@ -205,7 +207,7 @@ module Reversal
       result.join("\n")
     end
 
-    def to_s_unless
+    def to_s_unless(options = {})
       predicate, ifblock, elseblock = self.body
       result = []
       result << "unless #{predicate.to_s}"
