@@ -15,11 +15,11 @@ describe "Intermediate Representation Strinfication" do
   end
 
   it "converts list sexps with the one-line option" do
-    r(:list, "5", "10").to_s(:one_line => true).should.equal("5; 10")
+    r(:list, "5", "10").to_s(:one_line => true).should.equal("(5; 10)")
   end
 
   it "strips whitespace when converting 1-line list sexps" do
-    r(:list, "5", "10").indent(10).to_s(:one_line => true).should.equal("5; 10")
+    r(:list, "5", "10").indent(10).to_s(:one_line => true).should.equal("(5; 10)")
   end
 
   it "converts literal integers" do

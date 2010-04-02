@@ -52,7 +52,8 @@ module Reversal
     end
 
     def body_start
-      required_argc, arg_opt_labels, post_len, post_start, arg_rest, arg_block, arg_simple = self.args
+      return 0 unless complex_args?
+      arg_opt_labels = self.args[1]
       if arg_opt_labels && arg_opt_labels.any?
         self.labels[arg_opt_labels.last]
       else
@@ -72,12 +73,15 @@ module Reversal
       end
       if arg_opt_labels.any?
         reverser = Reverser.new(self, nil)
+        old_iseq_type = self.type
+        self.type = :top
         (arg_opt_labels.size - 1).times do |idx|
           argidx = required_argc + idx
           reverser.reset!
           puts "argument #{argidx} is from #{arg_opt_labels[idx]} to #{arg_opt_labels[idx + 1]}"
-          newargs[argidx] = reverser.decompile_body(arg_opt_labels[idx], arg_opt_labels[idx + 1])
+          newargs[argidx] = "#{self.locals[argidx]} = #{reverser.decompile_body(arg_opt_labels[idx], labels[arg_opt_labels[idx + 1]] - 1).to_s(:one_line => true)}"
         end
+        self.type = old_iseq_type
       end
       newargs
     end

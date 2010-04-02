@@ -71,7 +71,11 @@ module Reversal
 
     def to_s_list(options = {})
       if options[:one_line]
-        self.body.map {|x| x.to_s.lstrip}.join("; ")
+        result = self.body.map {|x| x.to_s.lstrip}.join("; ")
+        if self.body.size > 1
+          result = "(#{result})"
+        end
+        result
       else
         self.body.map {|x| x.to_s}.join("\n")
       end

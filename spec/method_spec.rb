@@ -56,6 +56,18 @@ class A
   def has_optional_argument(a1, a2, a3 = 5)
     p a1
   end
+
+  def has_optional_arguments(a1, a2, a3 = 5, a4 = a3)
+    p a1
+  end
+
+  def has_trailing_required_argument(a1, a2, a3 = 5, a4 = a3, a5)
+    p a1
+  end
+
+  def has_multiline_optional_argument(a1, a2, a3 = (a4 = a1; a1 = a2; a2 = a4; 10))
+    p a1
+  end
 end
 
 describe "Method Reversal" do
@@ -142,6 +154,24 @@ def has_optional_argument(a1, a2, a3 = 5)
 end
 EOF
 
+    @has_two_optional_args = DecompilationTestCase.new(A, :has_optional_arguments, <<-EOF)
+def has_optional_arguments(a1, a2, a3 = 5, a4 = a3)
+  p(a1)
+end
+EOF
+
+    @has_trailing_required_arg = DecompilationTestCase.new(A, :has_trailing_required_argument, <<-EOF)
+def has_trailing_required_argument(a1, a2, a3 = 5, a4 = a3, a5)
+  p(a1)
+end
+EOF
+
+    @has_multiline_optional_arg = DecompilationTestCase.new(A, :has_multiline_optional_argument, <<-EOF)
+def has_multiline_optional_argument(a1, a2, a3 = (a4 = a1; a1 = a2; a2 = a4; 10))
+  p(a1)
+end
+EOF
+
   end
   
   it "can decompile a method with one positional argument" do
@@ -198,5 +228,17 @@ EOF
 
   it "decompiles methods with a single optional argument" do
     @has_one_optional_arg.assert_correct
+  end
+
+  it "decompiles methods with two optional arguments" do
+    @has_two_optional_args.assert_correct
+  end
+
+  it "decompiles methods with a trailing required argument" do
+    @has_trailing_required_arg.assert_correct
+  end
+
+  it "decompiles a multiline optional argument" do
+    @has_multiline_optional_arg.assert_correct
   end
 end
