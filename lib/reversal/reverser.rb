@@ -142,6 +142,12 @@ module Reversal
     end
 
     def decompile_body(instruction = 0, stop = @iseq.body.size)
+      if instruction.is_a?(Symbol)
+        instruction = @iseq.labels[instruction]
+      end
+      if stop.is_a?(Symbol)
+        stop = @iseq.labels[stop]
+      end
       # for now, using non-idiomatic while loop bc of a chance we might need to
       # loop back
       iseq = @iseq

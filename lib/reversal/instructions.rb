@@ -304,11 +304,10 @@ module Reversal
         predicate = pop
         reverser = Reverser.new(@iseq, @parent)
         reverser.reset!
-        block1 = reverser.decompile_body(line_no + 1, @iseq.labels[target] - 1)
+        block1 = reverser.decompile_body(line_no + 1, target)
         end_jump_inst = @iseq.body[@iseq.labels[target] - 1]
         if end_jump_inst.first == :jump
-          end_jump_target = end_jump_inst[1]
-          block_2_end = @iseq.labels[end_jump_target]
+          block_2_end = end_jump_inst[1]
         else
           block_2_end = @iseq.body.size
         end
