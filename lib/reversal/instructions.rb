@@ -324,7 +324,31 @@ module Reversal
     def decompile_branchif(inst, line_no)
       decompile_branchunless(inst, line_no, true)
     end
-    
+
+    def stop_for_while_loop(target, line_no)
+      break_table = @iseq.catch_tables.select {|arr| arr.first == :break}
+      return nil if break_table.empty?
+      break_table = break_table.select {|arr| arr[2] == target}
+      raise "Unexpected jump instruction #{target} #{@iseq.body.inspect}" if break_table.empty?
+      raise "Unexpected backwards jump #{target} #{@iseq.body.inspect}" unless forward_jump?(line_no, target)
+      return break_table.first[3]
+    end
+
+    def decompile_jump(inst, line_no)
+      target = inst[1]
+      start = target
+      stop  = stop_for_while_loop(target, line_no)
+      return if stop.nil?
+      
+      reverser = Reverser.new(@iseq, @parent)
+      block = reverser.decompile_body(start, stop)
+      if block.last == r(:nil)
+        block.pop
+      end
+      pred = block.pop
+      push r(:while, pred, block)
+    end
+
     def decompile_throw(inst, line_no)
       # [:throw, level | state]
       # state: 0x01 = return

@@ -124,19 +124,26 @@ module Reversal
 
     def next_instruction_number(cur_inst, cur_line)
       if cur_inst.is_a?(Array)
-        if (cur_inst[0] == :branchif || cur_inst[0] == :branchunless) && forward_jump?(cur_line,cur_inst[1])
-          target = cur_inst[1]
-          location_of_target = @iseq.labels[target]
-          else_instruction = @iseq.body[location_of_target - 1]
-          if else_instruction.first == :jump
-            else_target = else_instruction[1]
-            location_of_else_target = @iseq.labels[else_target]
-            return location_of_else_target
-          else
-            return @iseq.body.size + 1
+        if (cur_inst[0] == :branchif || cur_inst[0] == :branchunless)
+          if forward_jump?(cur_line,cur_inst[1])
+            target = cur_inst[1]
+            location_of_target = @iseq.labels[target]
+            else_instruction = @iseq.body[location_of_target - 1]
+            if else_instruction.first == :jump
+              else_target = else_instruction[1]
+              location_of_else_target = @iseq.labels[else_target]
+              return location_of_else_target
+            else
+              return @iseq.body.size + 1
+            end
           end
         elsif cur_inst[0] == :leave
           return @iseq.body.size + 1
+        elsif cur_inst[0] == :jump
+          stopper = stop_for_while_loop(cur_inst[1], cur_line)
+          if stopper
+            return @iseq.labels[stopper]
+          end
         end
       end
       return cur_line + 1

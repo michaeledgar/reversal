@@ -45,7 +45,7 @@ module Reversal
       if self.respond_to?("to_s_#{self.type}".to_sym)
         send("to_s_#{self.type}".to_sym, options)
       else
-        super
+        super()
       end
     end
 
@@ -221,6 +221,15 @@ module Reversal
       result << "else"
       result << elseblock.indent.to_s
       result << "end"
+      result.join("\n")
+    end
+
+    def to_s_while(options = {})
+      pred, block = self.body
+      result = []
+      result << "begin"
+      result << block.indent.to_s
+      result << "end while #{pred}"
       result.join("\n")
     end
   end
