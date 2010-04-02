@@ -113,6 +113,16 @@ def test(x)
   end
 end
 RESULT
+
+    @simple_while = CompiledDecompilationTestCase.new <<CLASS, <<RESULT
+begin
+  x
+end while y
+CLASS
+begin
+  x
+end while y
+RESULT
   end
   
   it "can decompile a single if statement" do
@@ -141,5 +151,9 @@ RESULT
 
   it "can decompile a condition using the || operator" do
     @uses_oror.assert_correct
+  end
+
+  it "can decompile simple do..while loops" do
+    @simple_while.assert_correct
   end
 end

@@ -123,22 +123,23 @@ module Reversal
     end
 
     def next_instruction_number(cur_inst, cur_line)
-      if cur_inst.is_a?(Array) && (cur_inst[0] == :branchif || cur_inst[0] == :branchunless)
-        target = cur_inst[1]
-        location_of_target = @iseq.labels[target]
-        else_instruction = @iseq.body[location_of_target - 1]
-        if else_instruction.first == :jump
-          else_target = else_instruction[1]
-          location_of_else_target = @iseq.labels[else_target]
-          return location_of_else_target
-        else
+      if cur_inst.is_a?(Array)
+        if (cur_inst[0] == :branchif || cur_inst[0] == :branchunless) && forward_jump?(cur_line,cur_inst[1])
+          target = cur_inst[1]
+          location_of_target = @iseq.labels[target]
+          else_instruction = @iseq.body[location_of_target - 1]
+          if else_instruction.first == :jump
+            else_target = else_instruction[1]
+            location_of_else_target = @iseq.labels[else_target]
+            return location_of_else_target
+          else
+            return @iseq.body.size + 1
+          end
+        elsif cur_inst[0] == :leave
           return @iseq.body.size + 1
         end
-      elsif cur_inst.is_a?(Array) && (cur_inst[0] == :leave)
-        return @iseq.body.size + 1
-      else
-        return cur_line + 1
       end
+      return cur_line + 1
     end
 
     def decompile_body(instruction = @iseq.body_start, stop = @iseq.body.size)
