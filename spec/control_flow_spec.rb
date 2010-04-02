@@ -95,6 +95,25 @@ def test(x)
   end
 end
 RESULT
+
+    @uses_oror = CompiledDecompilationTestCase.new <<CLASS, <<RESULT
+def test(x)
+  if x || y
+    puts(x)
+  end
+end
+CLASS
+def test(x)
+  unless x
+    if y
+      puts(x)
+    end
+  else
+    puts(x)
+    nil
+  end
+end
+RESULT
   end
   
   it "can decompile a single if statement" do
@@ -119,5 +138,9 @@ RESULT
 
   it "can decompile a conditional using the && operator" do
     @uses_andand.assert_correct
+  end
+
+  it "can decompile a condition using the || operator" do
+    @uses_oror.assert_correct
   end
 end

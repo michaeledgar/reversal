@@ -322,7 +322,7 @@ module Reversal
     end
     
     def decompile_branchif(inst, line_no)
-      decompile_branchunless(true, line_no)
+      decompile_branchunless(inst, line_no, true)
     end
     
     def decompile_throw(inst, line_no)
