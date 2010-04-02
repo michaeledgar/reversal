@@ -52,6 +52,10 @@ class A
   def has_rest_in_middle(arg, *rest, another, second)
     p second
   end
+
+  def has_optional_argument(a1, a2, a3 = 5)
+    p a1
+  end
 end
 
 describe "Method Reversal" do
@@ -132,6 +136,12 @@ def has_rest_in_middle(arg, *rest, another, second)
 end
 EOF
 
+    @has_one_optional_arg = DecompilationTestCase.new(A, :has_optional_argument, <<-EOF)
+def has_optional_argument(a1, a2, a3 = 5)
+  p(a1)
+end
+EOF
+
   end
   
   it "can decompile a method with one positional argument" do
@@ -184,5 +194,9 @@ EOF
   
   it "decompiles methods with a rest argument in the middle" do
     @has_rest_in_middle.assert_correct
+  end
+
+  it "decompiles methods with a single optional argument" do
+    @has_one_optional_arg.assert_correct
   end
 end

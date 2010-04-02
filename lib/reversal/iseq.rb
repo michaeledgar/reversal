@@ -51,6 +51,15 @@ module Reversal
       self.args.kind_of? Array
     end
 
+    def body_start
+      required_argc, arg_opt_labels, post_len, post_start, arg_rest, arg_block, arg_simple = self.args
+      if arg_opt_labels && arg_opt_labels.any?
+        self.labels[arg_opt_labels.last]
+      else
+        0
+      end
+    end
+
     def improve_args(newargs)
       return newargs unless complex_args?
       # format of args array is [required_argc, arg_opt_labels, post_len, post_start, arg_rest, arg_block, arg_simple]
@@ -60,6 +69,15 @@ module Reversal
       end
       if arg_rest > -1
         newargs[arg_rest] = "*#{self.locals[arg_rest]}"
+      end
+      if arg_opt_labels.any?
+        reverser = Reverser.new(self, nil)
+        (arg_opt_labels.size - 1).times do |idx|
+          argidx = required_argc + idx
+          reverser.reset!
+          puts "argument #{argidx} is from #{arg_opt_labels[idx]} to #{arg_opt_labels[idx + 1]}"
+          newargs[argidx] = reverser.decompile_body(arg_opt_labels[idx], arg_opt_labels[idx + 1])
+        end
       end
       newargs
     end
