@@ -123,6 +123,32 @@ begin
   x
 end while y
 RESULT
+
+    @another_while = CompiledDecompilationTestCase.new <<CLASS, <<RESULT
+z = 10
+begin
+  puts(z)
+  z = z - 1
+end while z > 0
+CLASS
+z = 10
+begin
+  puts(z)
+  z = z - 1
+end while z > 0
+RESULT
+
+  @normal_while = CompiledDecompilationTestCase.new <<CLASS, <<RESULT
+while x > 0
+  puts(x)
+end
+CLASS
+if x > 0
+  begin
+    puts(x)
+  end while x > 0
+end
+RESULT
   end
   
   it "can decompile a single if statement" do
@@ -155,5 +181,13 @@ RESULT
 
   it "can decompile simple do..while loops" do
     @simple_while.assert_correct
+  end
+
+  it "can decompile a conditional do..while loop" do
+    @another_while.assert_correct
+  end
+
+  it "can decompile a normal while loop" do
+    @normal_while.assert_correct
   end
 end
